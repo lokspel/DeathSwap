@@ -1,0 +1,19 @@
+# DeathSwap Configuration
+
+game:
+  # Start Countdown — configures the pre-game lobby timer
+  min-players-to-start: 2     # Players needed for countdown to begin
+  start-delay: 120            # Countdown in seconds (2 min = 120)
+  min-players-fast-start: 4   # At 4+ players timer shrinks
+  fast-start-delay: 20        # Shortened countdown in seconds
+
+  # In-Game Rules
+  swap-interval: 180          # Seconds between swaps
+  countdown-seconds: 5        # Warning countdown before each swap
+  max-deaths: 5               # Deaths before elimination
+
+sounds:
+  countdown-tick: entity.note.pling
+  countdown-go: entity.experience_orb.pickup
+  swap: entity.enderman.teleport
+  win: ui.toast.challenge_complete
