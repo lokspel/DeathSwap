@@ -1,4 +1,4 @@
-# DeathSwap Configuration
+5# DeathSwap Configuration
 
 game:
   # Start Countdown — configures the pre-game lobby timer
@@ -8,7 +8,7 @@ game:
   fast-start-delay: 20        # Shortened countdown in seconds
 
   # In-Game Rules
-  swap-interval: 180          # Seconds between swaps
+  swap-interval: 300          # Seconds between swaps
   countdown-seconds: 5        # Warning countdown before each swap
   max-deaths: 5               # Deaths before elimination
   pvp-enabled: false           # Allow players to damage each other
