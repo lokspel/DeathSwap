@@ -2,33 +2,24 @@ package dev.lokspel.deathswap.commands;
 
 import dev.lokspel.deathswap.DeathSwap;
 import dev.lokspel.deathswap.config.ConfigManager;
-import dev.lokspel.deathswap.config.section.MessagesSection;
-import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 public class CommandSetLobby implements SubCommand {
 
     private final ConfigManager config;
-    private final MessagesSection messages;
 
     public CommandSetLobby(DeathSwap plugin) {
         this.config = plugin.getConfigManager();
-        this.messages = plugin.getConfigManager().getMessages();
     }
 
     @Override
     public boolean execute(CommandSender sender, String[] args) {
-        if (!(sender instanceof Player player)) {
-            sender.sendMessage(LegacyComponentSerializer.legacyAmpersand().deserialize("&cOnly players can use this command"));
-            return true;
-        }
-        if (!sender.hasPermission("deathswap.setlobby")) {
-            sender.sendMessage(LegacyComponentSerializer.legacyAmpersand().deserialize("&cNo permission"));
-            return true;
-        }
+        Player player = SubCommand.requirePlayer(sender);
+        if (player == null) return true;
+        if (SubCommand.requirePermission(sender, "deathswap.setlobby")) return true;
         config.setLobbyLocation(player.getLocation());
-        sender.sendMessage(messages.prefixed("lobby-set"));
+        sender.sendMessage(config.getMessages().prefixed("lobby-set"));
         return true;
     }
 }

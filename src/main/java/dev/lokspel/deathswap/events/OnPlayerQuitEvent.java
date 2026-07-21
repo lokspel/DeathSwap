@@ -11,8 +11,8 @@ public class OnPlayerQuitEvent implements Listener {
 
     private final GameManager game;
 
-    public OnPlayerQuitEvent() {
-        this.game = DeathSwap.getInstance().getGameManager();
+    public OnPlayerQuitEvent(DeathSwap plugin) {
+        this.game = plugin.getGameManager();
     }
 
     @EventHandler(priority = EventPriority.HIGH)

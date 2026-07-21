@@ -13,8 +13,8 @@ public class OnAsyncChatEvent implements Listener {
 
     private final GameManager game;
 
-    public OnAsyncChatEvent() {
-        this.game = DeathSwap.getInstance().getGameManager();
+    public OnAsyncChatEvent(DeathSwap plugin) {
+        this.game = plugin.getGameManager();
     }
 
     @EventHandler(priority = EventPriority.HIGH)

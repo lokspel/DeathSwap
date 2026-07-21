@@ -1,11 +1,10 @@
 package dev.lokspel.deathswap.game;
 
-import org.bukkit.Bukkit;
+import dev.lokspel.deathswap.util.PlayerUtil;
 import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -25,24 +24,13 @@ public class DeathManager {
         return counts.merge(uuid, 1, Integer::sum);
     }
 
-    public boolean contains(UUID uuid) {
-        return counts.containsKey(uuid);
-    }
-
     public void remove(UUID uuid) {
         counts.remove(uuid);
     }
 
     public Set<Player> getAlivePlayers() {
-        Set<Player> alive = new HashSet<>();
-
-        for (UUID uuid : counts.keySet()) {
-            Player player = Bukkit.getPlayer(uuid);
-            if (player != null && player.isOnline() && player.getGameMode() != GameMode.SPECTATOR) {
-                alive.add(player);
-            }
-        }
-
+        Set<Player> alive = PlayerUtil.getOnlinePlayers(counts.keySet());
+        alive.removeIf(p -> p.getGameMode() == GameMode.SPECTATOR);
         return alive;
     }
 

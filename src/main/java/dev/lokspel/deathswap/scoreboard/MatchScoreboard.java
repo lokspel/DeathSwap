@@ -1,6 +1,7 @@
 package dev.lokspel.deathswap.scoreboard;
 
 import dev.lokspel.deathswap.DeathSwap;
+import dev.lokspel.deathswap.util.PlayerUtil;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -49,8 +50,8 @@ public class MatchScoreboard {
             int deathCount = entry.getValue();
             if (deathCount == 0) continue;
 
-            Player player = Bukkit.getPlayer(entry.getKey());
-            if (player == null || !player.isOnline()) continue;
+            Player player = PlayerUtil.getOnlinePlayer(entry.getKey());
+            if (player == null) continue;
 
             String entryName = plugin.getConfigManager().getMessages().scoreboardEntry(player.getName());
             if (entryName.length() > 40) {
@@ -63,20 +64,14 @@ public class MatchScoreboard {
     }
 
     public void apply(Set<UUID> playerUuids) {
-        for (UUID uuid : playerUuids) {
-            Player player = Bukkit.getPlayer(uuid);
-            if (player != null && player.isOnline()) {
-                player.setScoreboard(scoreboard);
-            }
+        for (Player player : PlayerUtil.getOnlinePlayers(playerUuids)) {
+            player.setScoreboard(scoreboard);
         }
     }
 
     public void remove(Set<UUID> playerUuids) {
-        for (UUID uuid : playerUuids) {
-            Player player = Bukkit.getPlayer(uuid);
-            if (player != null && player.isOnline()) {
-                player.setScoreboard(Bukkit.getScoreboardManager().getMainScoreboard());
-            }
+        for (Player player : PlayerUtil.getOnlinePlayers(playerUuids)) {
+            player.setScoreboard(Bukkit.getScoreboardManager().getMainScoreboard());
         }
         scoreboard = null;
         deathsObjective = null;

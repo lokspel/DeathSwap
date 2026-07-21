@@ -12,8 +12,8 @@ public class OnPlayerRespawnEvent implements Listener {
 
     private final GameManager game;
 
-    public OnPlayerRespawnEvent() {
-        this.game = DeathSwap.getInstance().getGameManager();
+    public OnPlayerRespawnEvent(DeathSwap plugin) {
+        this.game = plugin.getGameManager();
     }
 
     @EventHandler(priority = EventPriority.HIGH)

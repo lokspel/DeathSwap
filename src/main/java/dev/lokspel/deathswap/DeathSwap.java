@@ -46,11 +46,11 @@ public class DeathSwap extends JavaPlugin {
         ));
         Objects.requireNonNull(getCommand("deathswap")).setExecutor(dispatcher);
 
-        getServer().getPluginManager().registerEvents(new OnPlayerDeathEvent(), this);
-        getServer().getPluginManager().registerEvents(new OnPlayerQuitEvent(), this);
-        getServer().getPluginManager().registerEvents(new OnAsyncChatEvent(), this);
-        getServer().getPluginManager().registerEvents(new OnEntityDamageEvent(), this);
-        getServer().getPluginManager().registerEvents(new OnPlayerRespawnEvent(), this);
+        getServer().getPluginManager().registerEvents(new OnPlayerDeathEvent(this), this);
+        getServer().getPluginManager().registerEvents(new OnPlayerQuitEvent(this), this);
+        getServer().getPluginManager().registerEvents(new OnAsyncChatEvent(this), this);
+        getServer().getPluginManager().registerEvents(new OnEntityDamageEvent(this), this);
+        getServer().getPluginManager().registerEvents(new OnPlayerRespawnEvent(this), this);
     }
 
     @Override

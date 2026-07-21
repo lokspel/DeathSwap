@@ -4,10 +4,11 @@ import dev.lokspel.deathswap.DeathSwap;
 import dev.lokspel.deathswap.config.ConfigManager;
 import dev.lokspel.deathswap.config.section.MessagesSection;
 import dev.lokspel.deathswap.scoreboard.MatchScoreboard;
-import net.kyori.adventure.sound.Sound;
+import dev.lokspel.deathswap.util.PlayerUtil;
+import dev.lokspel.deathswap.util.SoundUtil;
+import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
-import org.bukkit.NamespacedKey;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
 
@@ -49,31 +50,24 @@ public class MatchManager {
 
         for (Player player : players) {
             player.teleport(gameWorld.getSpawnLocation());
-            player.setGameMode(GameMode.SURVIVAL);
-            player.setHealth(20.0);
-            player.setFoodLevel(20);
-            player.setSaturation(5.0f);
-            player.setFireTicks(0);
-            player.setRemainingAir(player.getMaximumAir());
+            PlayerUtil.resetToSurvival(player);
         }
 
         deaths.init(playerUuids);
-
         scoreboard.init(messages.message("scoreboard-title"));
-        scoreboard.update(deaths.getAll());
-        scoreboard.apply(deaths.getAll().keySet());
+        refreshScoreboard();
 
         scheduleNextSwap();
         broadcast(messages.prefixed("game-started"));
     }
 
     public void onPlayerRespawn(Player player) {
-        if (!deaths.contains(player.getUniqueId())) return;
+        if (!playerUuids.contains(player.getUniqueId())) return;
         player.teleport(gameWorld.getSpawnLocation());
     }
 
     public void onPlayerDeath(Player player) {
-        if (!deaths.contains(player.getUniqueId())) return;
+        if (!playerUuids.contains(player.getUniqueId())) return;
         if (player.getGameMode() == GameMode.SPECTATOR) return;
 
         int deathCount = deaths.add(player.getUniqueId());
@@ -88,12 +82,11 @@ public class MatchManager {
             player.sendMessage(messages.prefixed("deaths-left", "deaths", String.valueOf(max - deathCount)));
         }
 
-        scoreboard.update(deaths.getAll());
-        scoreboard.apply(deaths.getAll().keySet());
+        refreshScoreboard();
     }
 
     public void leave(Player player, boolean teleport) {
-        if (!deaths.contains(player.getUniqueId())) return;
+        if (!playerUuids.contains(player.getUniqueId())) return;
 
         playerUuids.remove(player.getUniqueId());
         deaths.remove(player.getUniqueId());
@@ -103,8 +96,7 @@ public class MatchManager {
             plugin.getWorldManager().teleportToLobby(player);
         }
 
-        scoreboard.update(deaths.getAll());
-        scoreboard.apply(deaths.getAll().keySet());
+        refreshScoreboard();
         checkWinner();
     }
 
@@ -113,16 +105,25 @@ public class MatchManager {
     }
 
     public Set<Player> getOnlinePlayers() {
-        Set<Player> online = new HashSet<>();
+        return PlayerUtil.getOnlinePlayers(playerUuids);
+    }
 
-        for (UUID uuid : playerUuids) {
-            Player player = Bukkit.getPlayer(uuid);
-            if (player != null && player.isOnline()) {
-                online.add(player);
-            }
+    public void broadcast(Component message) {
+        for (Player player : getOnlinePlayers()) {
+            player.sendMessage(message);
         }
+    }
 
-        return online;
+    public void broadcastSound(String soundKey) {
+        var sound = SoundUtil.minecraft(soundKey);
+        for (Player player : getOnlinePlayers()) {
+            player.playSound(sound);
+        }
+    }
+
+    private void refreshScoreboard() {
+        scoreboard.update(deaths.getAll());
+        scoreboard.apply(deaths.getAll().keySet());
     }
 
     private void scheduleNextSwap() {
@@ -151,14 +152,7 @@ public class MatchManager {
         if (alive.size() == 1) {
             Player winner = alive.iterator().next();
             broadcast(messages.prefixed("winner", "player", winner.getName()));
-
-            Sound winSound = Sound.sound(
-                NamespacedKey.minecraft(cfg.winSound()),
-                Sound.Source.MASTER, 1.0f, 1.0f);
-            for (Player p : getOnlinePlayers()) {
-                p.playSound(winSound);
-            }
-
+            broadcastSound(cfg.winSound());
             winner.setGameMode(GameMode.SURVIVAL);
         }
 
@@ -176,21 +170,14 @@ public class MatchManager {
 
         scoreboard.remove(playerUuids);
         for (Player player : getOnlinePlayers()) {
-            player.setGameMode(GameMode.SURVIVAL);
+            PlayerUtil.resetToSurvival(player);
             plugin.getWorldManager().teleportToLobby(player);
         }
 
         plugin.getWorldManager().deleteWorld(gameWorld);
         deaths.clear();
         playerUuids.clear();
-
-        if (onEnd != null) onEnd.run();
-    }
-
-    public void broadcast(net.kyori.adventure.text.Component message) {
-        for (Player player : getOnlinePlayers()) {
-            player.sendMessage(message);
-        }
+        onEnd.run();
     }
 
     private void cancelTasks() {

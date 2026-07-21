@@ -1,14 +1,12 @@
 package dev.lokspel.deathswap.game;
 
 import dev.lokspel.deathswap.DeathSwap;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.title.Title;
+import dev.lokspel.deathswap.util.PlayerUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitTask;
 
-import java.time.Duration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -53,14 +51,7 @@ public class LobbyManager {
     }
 
     public Set<Player> getOnlinePlayers() {
-        Set<Player> online = new HashSet<>();
-        for (UUID uuid : players) {
-            Player player = Bukkit.getPlayer(uuid);
-            if (player != null && player.isOnline()) {
-                online.add(player);
-            }
-        }
-        return online;
+        return PlayerUtil.getOnlinePlayers(players);
     }
 
     public int size() {
@@ -102,14 +93,9 @@ public class LobbyManager {
             }
 
             var msg = cfg.getMessages().message("starting", "seconds", String.valueOf(remainingCountdown - 1));
-            var title = Title.title(msg, Component.empty(),
-                Title.Times.times(Duration.ZERO, Duration.ofSeconds(1), Duration.ZERO));
 
-            for (UUID uuid : players) {
-                Player player = Bukkit.getPlayer(uuid);
-                if (player != null && player.isOnline()) {
-                    player.showTitle(title);
-                }
+            for (Player player : PlayerUtil.getOnlinePlayers(players)) {
+                PlayerUtil.showCountdownTitle(player, msg);
             }
 
             remainingCountdown--;
@@ -117,8 +103,8 @@ public class LobbyManager {
     }
 
     private void restoreGameMode(UUID uuid) {
-        Player player = Bukkit.getPlayer(uuid);
-        if (player == null || !player.isOnline()) return;
+        Player player = PlayerUtil.getOnlinePlayer(uuid);
+        if (player == null) return;
         player.setGameMode(previousGameModes.getOrDefault(uuid, GameMode.SURVIVAL));
         previousGameModes.remove(uuid);
     }

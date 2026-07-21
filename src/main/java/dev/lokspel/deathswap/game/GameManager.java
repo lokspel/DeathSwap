@@ -92,7 +92,7 @@ public class GameManager {
         return null;
     }
 
-    public boolean isPlayer(Player player) {
+    public boolean isParticipant(Player player) {
         return findMatchByPlayer(player.getUniqueId()) != null || lobby.contains(player.getUniqueId());
     }
 

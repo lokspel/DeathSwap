@@ -1,6 +1,7 @@
 package dev.lokspel.deathswap.events;
 
 import dev.lokspel.deathswap.DeathSwap;
+import dev.lokspel.deathswap.config.ConfigManager;
 import dev.lokspel.deathswap.game.GameManager;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -11,9 +12,11 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent;
 public class OnEntityDamageEvent implements Listener {
 
     private final GameManager game;
+    private final ConfigManager config;
 
-    public OnEntityDamageEvent() {
-        this.game = DeathSwap.getInstance().getGameManager();
+    public OnEntityDamageEvent(DeathSwap plugin) {
+        this.game = plugin.getGameManager();
+        this.config = plugin.getConfigManager();
     }
 
     @EventHandler(priority = EventPriority.HIGH)
@@ -24,7 +27,7 @@ public class OnEntityDamageEvent implements Listener {
         if (game.findMatchByPlayer(damaged.getUniqueId()) == null) return;
         if (game.findMatchByPlayer(damager.getUniqueId()) == null) return;
 
-        if (!DeathSwap.getInstance().getConfigManager().pvpEnabled()) {
+        if (!config.pvpEnabled()) {
             event.setCancelled(true);
         }
     }

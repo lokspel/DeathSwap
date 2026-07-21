@@ -1,18 +1,13 @@
 package dev.lokspel.deathswap.game;
 
 import dev.lokspel.deathswap.DeathSwap;
-import net.kyori.adventure.sound.Sound;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.title.Title;
+import dev.lokspel.deathswap.util.PlayerUtil;
+import dev.lokspel.deathswap.util.SoundUtil;
 import org.bukkit.Bukkit;
-import org.bukkit.Location;
-import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitTask;
 
-import java.time.Duration;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Set;
 import java.util.function.Supplier;
 
@@ -52,12 +47,10 @@ public class SwapManager {
             }
 
             var msg = cfg.getMessages().message("countdown", "seconds", String.valueOf(countdownRemaining));
-            var title = Title.title(msg, Component.empty(),
-                Title.Times.times(Duration.ZERO, Duration.ofSeconds(1), Duration.ZERO));
-            var tickSound = sound(cfg.countdownTickSound());
+            var tickSound = SoundUtil.minecraft(cfg.countdownTickSound());
 
             for (Player player : aliveSupplier.get()) {
-                player.showTitle(title);
+                PlayerUtil.showCountdownTitle(player, msg);
                 player.playSound(tickSound);
             }
 
@@ -72,8 +65,8 @@ public class SwapManager {
         var playerList = new ArrayList<>(alivePlayers);
         var loc1 = playerList.get(0).getLocation();
         var loc2 = playerList.get(1).getLocation();
-        var goSound = sound(cfg.countdownGoSound());
-        var swapSound = sound(cfg.swapSound());
+        var goSound = SoundUtil.minecraft(cfg.countdownGoSound());
+        var swapSound = SoundUtil.minecraft(cfg.swapSound());
 
         for (Player player : playerList) {
             player.playSound(goSound);
@@ -97,9 +90,5 @@ public class SwapManager {
             countdownTask.cancel();
             countdownTask = null;
         }
-    }
-
-    private Sound sound(String key) {
-        return Sound.sound(NamespacedKey.minecraft(key), Sound.Source.MASTER, 1.0f, 1.0f);
     }
 }
