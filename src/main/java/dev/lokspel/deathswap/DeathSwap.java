@@ -10,8 +10,10 @@ import dev.lokspel.deathswap.commands.CommandStop;
 import dev.lokspel.deathswap.commands.RegisteredCommand;
 import dev.lokspel.deathswap.config.ConfigManager;
 import dev.lokspel.deathswap.events.OnAsyncChatEvent;
+import dev.lokspel.deathswap.events.OnEntityDamageEvent;
 import dev.lokspel.deathswap.events.OnPlayerDeathEvent;
 import dev.lokspel.deathswap.events.OnPlayerQuitEvent;
+import dev.lokspel.deathswap.events.OnPlayerRespawnEvent;
 import dev.lokspel.deathswap.game.GameManager;
 import dev.lokspel.deathswap.world.WorldManager;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -47,6 +49,8 @@ public class DeathSwap extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new OnPlayerDeathEvent(), this);
         getServer().getPluginManager().registerEvents(new OnPlayerQuitEvent(), this);
         getServer().getPluginManager().registerEvents(new OnAsyncChatEvent(), this);
+        getServer().getPluginManager().registerEvents(new OnEntityDamageEvent(), this);
+        getServer().getPluginManager().registerEvents(new OnPlayerRespawnEvent(), this);
     }
 
     @Override

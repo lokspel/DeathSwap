@@ -21,13 +21,17 @@ public class SwapManager {
     private final DeathSwap plugin;
     private BukkitTask delayTask;
     private BukkitTask countdownTask;
+    private int countdownRemaining;
 
     public SwapManager(DeathSwap plugin) {
         this.plugin = plugin;
     }
 
     public void scheduleNext(Runnable onSwapComplete, Supplier<Set<Player>> aliveSupplier) {
-        long delay = Math.max(1, (long) plugin.getConfigManager().swapInterval() - plugin.getConfigManager().countdownSeconds()) * 20L;
+        long delay = Math.max(1,
+            (long) plugin.getConfigManager().swapInterval() - plugin.getConfigManager().countdownSeconds()
+        ) * 20L;
+
         delayTask = Bukkit.getScheduler().runTaskLater(plugin, () -> {
             delayTask = null;
             if (aliveSupplier.get().size() < 2) return;
@@ -36,65 +40,66 @@ public class SwapManager {
     }
 
     private void startCountdown(Runnable onSwapComplete, Supplier<Set<Player>> aliveSupplier) {
-        int cd = plugin.getConfigManager().countdownSeconds();
-        final int[] remaining = {cd};
+        var cfg = plugin.getConfigManager();
+        countdownRemaining = cfg.countdownSeconds();
 
         countdownTask = Bukkit.getScheduler().runTaskTimer(plugin, () -> {
-            if (remaining[0] <= 0) {
+            if (countdownRemaining <= 0) {
                 onSwapComplete.run();
                 countdownTask.cancel();
                 countdownTask = null;
                 return;
             }
 
-            Title title = Title.title(
-                    plugin.getConfigManager().getMessages().message("countdown", "seconds", String.valueOf(remaining[0])),
-                    Component.empty(),
-                    Title.Times.times(Duration.ZERO, Duration.ofSeconds(1), Duration.ZERO)
-            );
-            Sound tickSound = Sound.sound(
-                    NamespacedKey.minecraft(plugin.getConfigManager().countdownTickSound()),
-                    Sound.Source.MASTER, 1.0f, 1.0f
-            );
+            var msg = cfg.getMessages().message("countdown", "seconds", String.valueOf(countdownRemaining));
+            var title = Title.title(msg, Component.empty(),
+                Title.Times.times(Duration.ZERO, Duration.ofSeconds(1), Duration.ZERO));
+            var tickSound = sound(cfg.countdownTickSound());
 
             for (Player player : aliveSupplier.get()) {
                 player.showTitle(title);
                 player.playSound(tickSound);
             }
 
-            remaining[0]--;
+            countdownRemaining--;
         }, 0L, 20L);
     }
 
     public void executeSwap(Set<Player> alivePlayers) {
         if (alivePlayers.size() < 2) return;
 
-        List<Player> playerList = new ArrayList<>(alivePlayers);
-        Location loc1 = playerList.get(0).getLocation();
-        Location loc2 = playerList.get(1).getLocation();
+        var cfg = plugin.getConfigManager();
+        var playerList = new ArrayList<>(alivePlayers);
+        var loc1 = playerList.get(0).getLocation();
+        var loc2 = playerList.get(1).getLocation();
+        var goSound = sound(cfg.countdownGoSound());
+        var swapSound = sound(cfg.swapSound());
 
-        Sound goSound = Sound.sound(
-                NamespacedKey.minecraft(plugin.getConfigManager().countdownGoSound()),
-                Sound.Source.MASTER, 1.0f, 1.0f
-        );
-        Sound swapSound = Sound.sound(
-                NamespacedKey.minecraft(plugin.getConfigManager().swapSound()),
-                Sound.Source.MASTER, 1.0f, 1.0f
-        );
-
-        for (Player player : playerList) player.playSound(goSound);
+        for (Player player : playerList) {
+            player.playSound(goSound);
+        }
 
         playerList.get(0).teleport(loc2);
         playerList.get(1).teleport(loc1);
 
         for (Player player : playerList) {
             player.playSound(swapSound);
-            player.sendMessage(plugin.getConfigManager().getMessages().prefixed("swap-message"));
+            player.sendMessage(cfg.getMessages().prefixed("swap-message"));
         }
     }
 
     public void cancel() {
-        if (delayTask != null) { delayTask.cancel(); delayTask = null; }
-        if (countdownTask != null) { countdownTask.cancel(); countdownTask = null; }
+        if (delayTask != null) {
+            delayTask.cancel();
+            delayTask = null;
+        }
+        if (countdownTask != null) {
+            countdownTask.cancel();
+            countdownTask = null;
+        }
+    }
+
+    private Sound sound(String key) {
+        return Sound.sound(NamespacedKey.minecraft(key), Sound.Source.MASTER, 1.0f, 1.0f);
     }
 }

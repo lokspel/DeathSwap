@@ -11,7 +11,6 @@ public class CommandLeave implements SubCommand {
 
     private final GameManager game;
     private final MessagesSection messages;
-    private final LegacyComponentSerializer legacySerializer = LegacyComponentSerializer.legacyAmpersand();
 
     public CommandLeave(DeathSwap plugin) {
         this.game = plugin.getGameManager();
@@ -21,7 +20,7 @@ public class CommandLeave implements SubCommand {
     @Override
     public boolean execute(CommandSender sender, String[] args) {
         if (!(sender instanceof Player player)) {
-            sender.sendMessage(legacySerializer.deserialize("&cOnly players can use this command"));
+            sender.sendMessage(LegacyComponentSerializer.legacyAmpersand().deserialize("&cOnly players can use this command"));
             return true;
         }
         if (!game.isPlayer(player)) {

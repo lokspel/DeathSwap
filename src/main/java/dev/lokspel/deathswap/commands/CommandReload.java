@@ -8,7 +8,6 @@ import org.bukkit.command.CommandSender;
 public class CommandReload implements SubCommand {
 
     private final ConfigManager config;
-    private final LegacyComponentSerializer legacySerializer = LegacyComponentSerializer.legacyAmpersand();
 
     public CommandReload(DeathSwap plugin) {
         this.config = plugin.getConfigManager();
@@ -17,7 +16,7 @@ public class CommandReload implements SubCommand {
     @Override
     public boolean execute(CommandSender sender, String[] args) {
         if (!sender.hasPermission("deathswap.reload")) {
-            sender.sendMessage(legacySerializer.deserialize("&cNo permission"));
+            sender.sendMessage(LegacyComponentSerializer.legacyAmpersand().deserialize("&cNo permission"));
             return true;
         }
         config.load();

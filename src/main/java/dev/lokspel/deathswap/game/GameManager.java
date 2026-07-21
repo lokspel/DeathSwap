@@ -23,10 +23,12 @@ public class GameManager {
 
     public void join(Player player) {
         UUID uuid = player.getUniqueId();
+
         if (findMatchByPlayer(uuid) != null || lobby.contains(uuid)) {
             player.sendMessage(plugin.getConfigManager().getMessages().prefixed("already-joined"));
             return;
         }
+
         lobby.join(player);
         lobby.tryAutoStart(this::createMatch);
     }
@@ -37,24 +39,29 @@ public class GameManager {
 
     public void leave(Player player, boolean teleport) {
         UUID uuid = player.getUniqueId();
-        MatchManager m = findMatchByPlayer(uuid);
-        if (m != null) {
-            m.leave(player, teleport);
+        MatchManager match = findMatchByPlayer(uuid);
+
+        if (match != null) {
+            match.leave(player, teleport);
         } else if (lobby.contains(uuid)) {
             lobby.leave(uuid);
         } else {
             return;
         }
+
         player.sendMessage(plugin.getConfigManager().getMessages().prefixed("left"));
     }
 
     public void onPlayerDeath(Player player) {
-        MatchManager m = findMatchByPlayer(player.getUniqueId());
-        if (m != null) m.onPlayerDeath(player);
+        MatchManager match = findMatchByPlayer(player.getUniqueId());
+        if (match != null) {
+            match.onPlayerDeath(player);
+        }
     }
 
     public boolean forceStart() {
         if (lobby.size() < 2) return false;
+
         lobby.cancelTask();
         createMatch();
         return true;
@@ -63,13 +70,17 @@ public class GameManager {
     private void createMatch() {
         Set<Player> players = lobby.getOnlinePlayers();
         if (players.size() < 2) return;
+
         lobby.clear();
+
         UUID matchId = UUID.randomUUID();
         matches.put(matchId, new MatchManager(plugin, new ArrayList<>(players), () -> matches.remove(matchId)));
     }
 
     public void stop() {
-        for (MatchManager m : List.copyOf(matches.values())) m.stop();
+        for (MatchManager m : List.copyOf(matches.values())) {
+            m.stop();
+        }
         matches.clear();
         lobby.clear();
     }

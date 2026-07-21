@@ -16,7 +16,9 @@ public class DeathManager {
 
     public void init(Set<UUID> players) {
         counts.clear();
-        players.forEach(uuid -> counts.put(uuid, 0));
+        for (UUID uuid : players) {
+            counts.put(uuid, 0);
+        }
     }
 
     public int add(UUID uuid) {
@@ -33,12 +35,14 @@ public class DeathManager {
 
     public Set<Player> getAlivePlayers() {
         Set<Player> alive = new HashSet<>();
+
         for (UUID uuid : counts.keySet()) {
             Player player = Bukkit.getPlayer(uuid);
             if (player != null && player.isOnline() && player.getGameMode() != GameMode.SPECTATOR) {
                 alive.add(player);
             }
         }
+
         return alive;
     }
 

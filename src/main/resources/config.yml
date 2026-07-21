@@ -11,6 +11,7 @@ game:
   swap-interval: 180          # Seconds between swaps
   countdown-seconds: 5        # Warning countdown before each swap
   max-deaths: 5               # Deaths before elimination
+  pvp-enabled: false           # Allow players to damage each other
 
 sounds:
   countdown-tick: entity.note.pling

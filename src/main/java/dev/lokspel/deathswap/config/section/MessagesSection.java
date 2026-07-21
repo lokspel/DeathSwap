@@ -40,6 +40,7 @@ public class MessagesSection {
 
     private String applyReplacements(String text, String... replacements) {
         if (replacements.length == 0) return text;
+
         String result = text;
         for (int i = 0; i < replacements.length - 1; i += 2) {
             result = result.replace("<" + replacements[i] + ">", replacements[i + 1]);

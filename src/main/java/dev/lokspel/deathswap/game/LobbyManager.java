@@ -29,6 +29,7 @@ public class LobbyManager {
 
     public void join(Player player) {
         if (!players.add(player.getUniqueId())) return;
+
         previousGameModes.put(player.getUniqueId(), player.getGameMode());
         player.setGameMode(GameMode.SURVIVAL);
         player.sendMessage(plugin.getConfigManager().getMessages().prefixed("joined"));
@@ -39,7 +40,6 @@ public class LobbyManager {
                 remainingCountdown = target;
             }
         }
-
     }
 
     public void leave(UUID uuid) {
@@ -56,7 +56,9 @@ public class LobbyManager {
         Set<Player> online = new HashSet<>();
         for (UUID uuid : players) {
             Player player = Bukkit.getPlayer(uuid);
-            if (player != null && player.isOnline()) online.add(player);
+            if (player != null && player.isOnline()) {
+                online.add(player);
+            }
         }
         return online;
     }
@@ -73,16 +75,18 @@ public class LobbyManager {
     }
 
     public void cancelTask() {
-        if (startTask != null) { startTask.cancel(); startTask = null; }
+        if (startTask == null) return;
+        startTask.cancel();
+        startTask = null;
     }
 
     public void tryAutoStart(Runnable onStart) {
-        int minStart = plugin.getConfigManager().minPlayersToStart();
-        if (startTask != null || players.size() < minStart) return;
+        var cfg = plugin.getConfigManager();
+        if (startTask != null || players.size() < cfg.minPlayersToStart()) return;
 
-        remainingCountdown = plugin.getConfigManager().startDelay();
-        if (players.size() >= plugin.getConfigManager().minPlayersFastStart()) {
-            remainingCountdown = Math.min(remainingCountdown, plugin.getConfigManager().fastStartDelay());
+        remainingCountdown = cfg.startDelay();
+        if (players.size() >= cfg.minPlayersFastStart()) {
+            remainingCountdown = Math.min(remainingCountdown, cfg.fastStartDelay());
         }
 
         startTask = Bukkit.getScheduler().runTaskTimer(plugin, () -> {
@@ -91,25 +95,31 @@ public class LobbyManager {
                 onStart.run();
                 return;
             }
-            if (players.size() < plugin.getConfigManager().minPlayersToStart()) { cancelTask(); return; }
 
-            Component msg = plugin.getConfigManager().getMessages().message("starting", "seconds", String.valueOf(remainingCountdown - 1));
-            Title title = Title.title(msg, Component.empty(),
-                    Title.Times.times(Duration.ZERO, Duration.ofSeconds(1), Duration.ZERO));
+            if (players.size() < cfg.minPlayersToStart()) {
+                cancelTask();
+                return;
+            }
+
+            var msg = cfg.getMessages().message("starting", "seconds", String.valueOf(remainingCountdown - 1));
+            var title = Title.title(msg, Component.empty(),
+                Title.Times.times(Duration.ZERO, Duration.ofSeconds(1), Duration.ZERO));
 
             for (UUID uuid : players) {
                 Player player = Bukkit.getPlayer(uuid);
-                if (player != null && player.isOnline()) player.showTitle(title);
+                if (player != null && player.isOnline()) {
+                    player.showTitle(title);
+                }
             }
+
             remainingCountdown--;
         }, 0L, 20L);
     }
 
     private void restoreGameMode(UUID uuid) {
         Player player = Bukkit.getPlayer(uuid);
-        if (player != null && player.isOnline()) {
-            player.setGameMode(previousGameModes.getOrDefault(uuid, GameMode.SURVIVAL));
-        }
+        if (player == null || !player.isOnline()) return;
+        player.setGameMode(previousGameModes.getOrDefault(uuid, GameMode.SURVIVAL));
         previousGameModes.remove(uuid);
     }
 }

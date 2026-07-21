@@ -20,9 +20,9 @@ import java.util.UUID;
 public class MatchScoreboard {
 
     private final DeathSwap plugin;
+    private final Set<String> scoreboardKeys = new HashSet<>();
     private Scoreboard scoreboard;
     private Objective deathsObjective;
-    private final Set<String> scoreboardKeys = new HashSet<>();
 
     public MatchScoreboard(DeathSwap plugin) {
         this.plugin = plugin;
@@ -30,11 +30,7 @@ public class MatchScoreboard {
 
     public void init(Component title) {
         scoreboard = Bukkit.getScoreboardManager().getNewScoreboard();
-        deathsObjective = scoreboard.registerNewObjective(
-                "deaths",
-                Criteria.DUMMY,
-                title
-        );
+        deathsObjective = scoreboard.registerNewObjective("deaths", Criteria.DUMMY, title);
         deathsObjective.setDisplaySlot(DisplaySlot.SIDEBAR);
     }
 
@@ -52,15 +48,17 @@ public class MatchScoreboard {
         for (Map.Entry<UUID, Integer> entry : sorted) {
             int deathCount = entry.getValue();
             if (deathCount == 0) continue;
+
             Player player = Bukkit.getPlayer(entry.getKey());
-            if (player != null && player.isOnline()) {
-                String entryName = plugin.getConfigManager().getMessages().scoreboardEntry(player.getName());
-                if (entryName.length() > 40) {
-                    entryName = entryName.substring(0, 40);
-                }
-                deathsObjective.getScore(entryName).setScore(deathCount);
-                scoreboardKeys.add(entryName);
+            if (player == null || !player.isOnline()) continue;
+
+            String entryName = plugin.getConfigManager().getMessages().scoreboardEntry(player.getName());
+            if (entryName.length() > 40) {
+                entryName = entryName.substring(0, 40);
             }
+
+            deathsObjective.getScore(entryName).setScore(deathCount);
+            scoreboardKeys.add(entryName);
         }
     }
 

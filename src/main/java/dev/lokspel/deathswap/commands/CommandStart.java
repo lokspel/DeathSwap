@@ -10,7 +10,6 @@ public class CommandStart implements SubCommand {
 
     private final GameManager game;
     private final MessagesSection messages;
-    private final LegacyComponentSerializer legacySerializer = LegacyComponentSerializer.legacyAmpersand();
 
     public CommandStart(DeathSwap plugin) {
         this.game = plugin.getGameManager();
@@ -20,7 +19,7 @@ public class CommandStart implements SubCommand {
     @Override
     public boolean execute(CommandSender sender, String[] args) {
         if (!sender.hasPermission("deathswap.start")) {
-            sender.sendMessage(legacySerializer.deserialize("&cNo permission"));
+            sender.sendMessage(LegacyComponentSerializer.legacyAmpersand().deserialize("&cNo permission"));
             return true;
         }
         if (!game.forceStart()) {

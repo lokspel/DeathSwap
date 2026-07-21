@@ -20,6 +20,7 @@ public class ConfigManager {
     private int minPlayersToStart;
     private int minPlayersFastStart;
     private int fastStartDelay;
+    private boolean pvpEnabled;
     private String countdownTickSound;
     private String countdownGoSound;
     private String swapSound;
@@ -48,6 +49,7 @@ public class ConfigManager {
         minPlayersToStart = cfg.getInt("game.min-players-to-start", 2);
         minPlayersFastStart = cfg.getInt("game.min-players-fast-start", 4);
         fastStartDelay = cfg.getInt("game.fast-start-delay", 3);
+        pvpEnabled = cfg.getBoolean("game.pvp-enabled", true);
 
         countdownTickSound = cfg.getString("sounds.countdown-tick", "entity.note.pling");
         countdownGoSound = cfg.getString("sounds.countdown-go", "entity.experience_orb.pickup");
@@ -68,68 +70,33 @@ public class ConfigManager {
 
     public Location getLobbyLocation() {
         var cfg = plugin.getConfig();
-        if (!cfg.contains("lobby.world")) {
-            return null;
-        }
+        if (!cfg.contains("lobby.world")) return null;
+
         String worldName = cfg.getString("lobby.world");
         if (worldName == null) return null;
+
         World world = Bukkit.getWorld(worldName);
         if (world == null) return null;
-        return new Location(
-                world,
-                cfg.getDouble("lobby.x"),
-                cfg.getDouble("lobby.y"),
-                cfg.getDouble("lobby.z"),
-                (float) cfg.getDouble("lobby.yaw"),
-                (float) cfg.getDouble("lobby.pitch")
-        );
+
+        return new Location(world,
+            cfg.getDouble("lobby.x"),
+            cfg.getDouble("lobby.y"),
+            cfg.getDouble("lobby.z"),
+            (float) cfg.getDouble("lobby.yaw"),
+            (float) cfg.getDouble("lobby.pitch"));
     }
 
-    public int swapInterval() {
-        return swapInterval;
-    }
-
-    public MessagesSection getMessages() {
-        return messages;
-    }
-
-    public int maxDeaths() {
-        return maxDeaths;
-    }
-
-    public int countdownSeconds() {
-        return countdownSeconds;
-    }
-
-    public int startDelay() {
-        return startDelay;
-    }
-
-    public int minPlayersToStart() {
-        return minPlayersToStart;
-    }
-
-    public int minPlayersFastStart() {
-        return minPlayersFastStart;
-    }
-
-    public int fastStartDelay() {
-        return fastStartDelay;
-    }
-
-    public String countdownTickSound() {
-        return countdownTickSound;
-    }
-
-    public String countdownGoSound() {
-        return countdownGoSound;
-    }
-
-    public String swapSound() {
-        return swapSound;
-    }
-
-    public String winSound() {
-        return winSound;
-    }
+    public int swapInterval() { return swapInterval; }
+    public MessagesSection getMessages() { return messages; }
+    public int maxDeaths() { return maxDeaths; }
+    public int countdownSeconds() { return countdownSeconds; }
+    public int startDelay() { return startDelay; }
+    public int minPlayersToStart() { return minPlayersToStart; }
+    public int minPlayersFastStart() { return minPlayersFastStart; }
+    public int fastStartDelay() { return fastStartDelay; }
+    public boolean pvpEnabled() { return pvpEnabled; }
+    public String countdownTickSound() { return countdownTickSound; }
+    public String countdownGoSound() { return countdownGoSound; }
+    public String swapSound() { return swapSound; }
+    public String winSound() { return winSound; }
 }

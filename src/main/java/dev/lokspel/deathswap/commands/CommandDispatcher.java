@@ -15,7 +15,6 @@ import java.util.Map;
 public class CommandDispatcher implements CommandExecutor {
 
     private final DeathSwap plugin;
-    private final LegacyComponentSerializer legacySerializer = LegacyComponentSerializer.legacyAmpersand();
     private final Map<String, SubCommand> subcommands = new LinkedHashMap<>();
 
     public CommandDispatcher(DeathSwap plugin, List<RegisteredCommand> commands) {

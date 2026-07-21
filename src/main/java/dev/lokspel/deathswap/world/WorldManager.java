@@ -22,10 +22,8 @@ public class WorldManager {
     }
 
     public World createGameWorld() {
-        String worldName = "deathswap-" + UUID.randomUUID().toString().substring(0, 8);
-        WorldCreator creator = new WorldCreator(worldName);
-        creator.environment(World.Environment.NORMAL);
-        World gameWorld = Bukkit.createWorld(creator);
+        String worldName = "deathswap_" + UUID.randomUUID().toString().substring(0, 8);
+        World gameWorld = Bukkit.createWorld(new WorldCreator(worldName));
         if (gameWorld == null) {
             throw new IllegalStateException("Failed to create game world: " + worldName);
         }
@@ -34,9 +32,11 @@ public class WorldManager {
 
     public void deleteWorld(World world) {
         if (world == null) return;
+
         for (Player player : world.getPlayers()) {
             teleportToLobby(player);
         }
+
         Path worldFolder = world.getWorldFolder().toPath();
         Bukkit.unloadWorld(world, false);
         deleteDirectory(worldFolder);
@@ -45,11 +45,12 @@ public class WorldManager {
     public void teleportToLobby(Player player) {
         Location lobby = plugin.getConfigManager().getLobbyLocation();
         player.teleport(Objects.requireNonNullElseGet(lobby,
-                () -> Bukkit.getWorlds().getFirst().getSpawnLocation()));
+            () -> Bukkit.getWorlds().getFirst().getSpawnLocation()));
     }
 
     private void deleteDirectory(Path path) {
         if (!Files.exists(path)) return;
+
         try (var files = Files.list(path)) {
             files.forEach(child -> {
                 if (Files.isDirectory(child)) {

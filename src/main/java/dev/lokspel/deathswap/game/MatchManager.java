@@ -1,6 +1,8 @@
 package dev.lokspel.deathswap.game;
 
 import dev.lokspel.deathswap.DeathSwap;
+import dev.lokspel.deathswap.config.ConfigManager;
+import dev.lokspel.deathswap.config.section.MessagesSection;
 import dev.lokspel.deathswap.scoreboard.MatchScoreboard;
 import net.kyori.adventure.sound.Sound;
 import org.bukkit.Bukkit;
@@ -17,6 +19,8 @@ import java.util.UUID;
 public class MatchManager {
 
     private final DeathSwap plugin;
+    private final ConfigManager cfg;
+    private final MessagesSection messages;
     private final World gameWorld;
     private final Set<UUID> playerUuids;
     private final DeathManager deaths;
@@ -27,6 +31,8 @@ public class MatchManager {
 
     public MatchManager(DeathSwap plugin, List<Player> players, Runnable onEnd) {
         this.plugin = plugin;
+        this.cfg = plugin.getConfigManager();
+        this.messages = cfg.getMessages();
         this.onEnd = onEnd;
         this.playerUuids = new HashSet<>();
         this.deaths = new DeathManager();
@@ -36,7 +42,7 @@ public class MatchManager {
 
         for (Player player : players) {
             playerUuids.add(player.getUniqueId());
-            player.sendMessage(plugin.getConfigManager().getMessages().prefixed("world-preparing"));
+            player.sendMessage(messages.prefixed("world-preparing"));
         }
 
         gameWorld = plugin.getWorldManager().createGameWorld();
@@ -44,32 +50,42 @@ public class MatchManager {
         for (Player player : players) {
             player.teleport(gameWorld.getSpawnLocation());
             player.setGameMode(GameMode.SURVIVAL);
+            player.setHealth(20.0);
+            player.setFoodLevel(20);
+            player.setSaturation(5.0f);
+            player.setFireTicks(0);
+            player.setRemainingAir(player.getMaximumAir());
         }
 
         deaths.init(playerUuids);
 
-        scoreboard.init(plugin.getConfigManager().getMessages().message("scoreboard-title"));
+        scoreboard.init(messages.message("scoreboard-title"));
         scoreboard.update(deaths.getAll());
         scoreboard.apply(deaths.getAll().keySet());
 
         scheduleNextSwap();
-        broadcast(plugin.getConfigManager().getMessages().prefixed("game-started"));
+        broadcast(messages.prefixed("game-started"));
+    }
+
+    public void onPlayerRespawn(Player player) {
+        if (!deaths.contains(player.getUniqueId())) return;
+        player.teleport(gameWorld.getSpawnLocation());
     }
 
     public void onPlayerDeath(Player player) {
         if (!deaths.contains(player.getUniqueId())) return;
         if (player.getGameMode() == GameMode.SPECTATOR) return;
 
-        int d = deaths.add(player.getUniqueId());
-        int max = plugin.getConfigManager().maxDeaths();
+        int deathCount = deaths.add(player.getUniqueId());
+        int max = cfg.maxDeaths();
 
-        if (d >= max) {
+        if (deathCount >= max) {
             player.setGameMode(GameMode.SPECTATOR);
-            player.sendMessage(plugin.getConfigManager().getMessages().prefixed("eliminated"));
-            broadcast(plugin.getConfigManager().getMessages().prefixed("player-eliminated", "player", player.getName()));
+            player.sendMessage(messages.prefixed("eliminated"));
+            broadcast(messages.prefixed("player-eliminated", "player", player.getName()));
             checkWinner();
         } else {
-            player.sendMessage(plugin.getConfigManager().getMessages().prefixed("deaths-left", "deaths", String.valueOf(max - d)));
+            player.sendMessage(messages.prefixed("deaths-left", "deaths", String.valueOf(max - deathCount)));
         }
 
         scoreboard.update(deaths.getAll());
@@ -82,9 +98,11 @@ public class MatchManager {
         playerUuids.remove(player.getUniqueId());
         deaths.remove(player.getUniqueId());
         player.setScoreboard(Bukkit.getScoreboardManager().getMainScoreboard());
+
         if (teleport) {
             plugin.getWorldManager().teleportToLobby(player);
         }
+
         scoreboard.update(deaths.getAll());
         scoreboard.apply(deaths.getAll().keySet());
         checkWinner();
@@ -96,12 +114,14 @@ public class MatchManager {
 
     public Set<Player> getOnlinePlayers() {
         Set<Player> online = new HashSet<>();
+
         for (UUID uuid : playerUuids) {
             Player player = Bukkit.getPlayer(uuid);
             if (player != null && player.isOnline()) {
                 online.add(player);
             }
         }
+
         return online;
     }
 
@@ -112,10 +132,12 @@ public class MatchManager {
 
     private void onSwapComplete() {
         Set<Player> alive = deaths.getAlivePlayers();
+
         if (alive.size() < 2) {
             checkWinner();
             return;
         }
+
         swap.executeSwap(alive);
         scheduleNextSwap();
     }
@@ -128,14 +150,15 @@ public class MatchManager {
 
         if (alive.size() == 1) {
             Player winner = alive.iterator().next();
-            broadcast(plugin.getConfigManager().getMessages().prefixed("winner", "player", winner.getName()));
+            broadcast(messages.prefixed("winner", "player", winner.getName()));
+
             Sound winSound = Sound.sound(
-                    NamespacedKey.minecraft(plugin.getConfigManager().winSound()),
-                    Sound.Source.MASTER, 1.0f, 1.0f
-            );
+                NamespacedKey.minecraft(cfg.winSound()),
+                Sound.Source.MASTER, 1.0f, 1.0f);
             for (Player p : getOnlinePlayers()) {
                 p.playSound(winSound);
             }
+
             winner.setGameMode(GameMode.SURVIVAL);
         }
 
@@ -150,14 +173,17 @@ public class MatchManager {
     private void cleanupNow() {
         if (cleanedUp) return;
         cleanedUp = true;
+
         scoreboard.remove(playerUuids);
         for (Player player : getOnlinePlayers()) {
             player.setGameMode(GameMode.SURVIVAL);
             plugin.getWorldManager().teleportToLobby(player);
         }
+
         plugin.getWorldManager().deleteWorld(gameWorld);
         deaths.clear();
         playerUuids.clear();
+
         if (onEnd != null) onEnd.run();
     }
 

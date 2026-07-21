@@ -20,17 +20,16 @@ public class OnAsyncChatEvent implements Listener {
     @EventHandler(priority = EventPriority.HIGH)
     public void handle(AsyncChatEvent event) {
         Player sender = event.getPlayer();
-        MatchManager m = game.findMatchByPlayer(sender.getUniqueId());
+        MatchManager match = game.findMatchByPlayer(sender.getUniqueId());
 
-        if (m != null) {
+        if (match != null) {
             event.viewers().clear();
-            for (Player p : m.getOnlinePlayers()) {
+            for (Player p : match.getOnlinePlayers()) {
                 event.viewers().add(p);
             }
         } else {
             event.viewers().removeIf(p ->
-                    p instanceof Player player && game.findMatchByPlayer(player.getUniqueId()) != null
-            );
+                p instanceof Player player && game.findMatchByPlayer(player.getUniqueId()) != null);
         }
     }
 }
