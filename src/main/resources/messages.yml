@@ -13,11 +13,13 @@ no-permission: "<red>You don't have permission to use this command.</red>"
 # Join / Leave
 joined: "<green>You joined the DeathSwap game.</green>"
 already-joined: "<red>You are already in the game.</red>"
+already-queue: "<yellow>You are already waiting for a game.</yellow>"
 not-joined: "<red>You are not in the game.</red>"
 left: "<gray>You left the DeathSwap game.</gray>"
 
 # Game Start
 not-enough-players: "<red>Not enough players. At least 2 players are required.</red>"
+worlds-busy: "<red>No free world slots. Please try again in a moment.</red>"
 starting: "<white>Game starting in</white> <gold><seconds></gold><white>s...</white>"
 world-preparing: "<gray><italic>Preparing the world...</italic></gray>"
 game-started: "<green>The DeathSwap game has started!</green>"

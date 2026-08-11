@@ -55,6 +55,20 @@ public final class PlayerState {
         return new PlayerState(player);
     }
 
+    /**
+     * Prepares a player for a fresh match: survival with full health, food and
+     * cleared status effects. Used after {@link #capture(Player)} so the lobby
+     * state can be restored later.
+     */
+    public static void resetForMatch(Player player) {
+        player.setGameMode(GameMode.SURVIVAL);
+        player.setHealth(20.0);
+        player.setFoodLevel(20);
+        player.setSaturation(5.0f);
+        player.setFireTicks(0);
+        player.setRemainingAir(player.getMaximumAir());
+    }
+
     public void restore(Player player) {
         var inventory = player.getInventory();
 

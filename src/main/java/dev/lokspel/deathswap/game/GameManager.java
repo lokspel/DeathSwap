@@ -24,8 +24,12 @@ public class GameManager {
     public void join(Player player) {
         UUID uuid = player.getUniqueId();
 
-        if (findMatchByPlayer(uuid) != null || lobby.contains(uuid)) {
+        if (findMatchByPlayer(uuid) != null) {
             player.sendMessage(plugin.getConfigManager().getMessages().prefixed("already-joined"));
+            return;
+        }
+        if (lobby.contains(uuid)) {
+            player.sendMessage(plugin.getConfigManager().getMessages().prefixed("already-queue"));
             return;
         }
 
@@ -70,6 +74,14 @@ public class GameManager {
     private void createMatch() {
         Set<Player> players = lobby.getOnlinePlayers();
         if (players.size() < 2) return;
+
+        if (!plugin.getWorldManager().hasFreeSlot()) {
+            var msg = plugin.getConfigManager().getMessages().prefixed("worlds-busy");
+            for (Player player : players) {
+                player.sendMessage(msg);
+            }
+            return;
+        }
 
         lobby.clear();
 

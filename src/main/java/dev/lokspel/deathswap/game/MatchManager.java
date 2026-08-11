@@ -4,6 +4,7 @@ import dev.lokspel.deathswap.DeathSwap;
 import dev.lokspel.deathswap.config.ConfigManager;
 import dev.lokspel.deathswap.config.section.MessagesSection;
 import dev.lokspel.deathswap.scoreboard.MatchScoreboard;
+import dev.lokspel.deathswap.player.PlayerState;
 import dev.lokspel.deathswap.player.PlayerStateManager;
 import dev.lokspel.deathswap.util.PlayerUtil;
 import dev.lokspel.deathswap.util.SoundUtil;
@@ -25,6 +26,7 @@ public class MatchManager {
     private final MessagesSection messages;
     private final World gameWorld;
     private final Set<UUID> playerUuids;
+    private final Set<UUID> spectators;
     private final PlayerStateManager states;
     private final DeathManager deaths;
     private final SwapManager swap;
@@ -38,6 +40,7 @@ public class MatchManager {
         this.messages = cfg.getMessages();
         this.onEnd = onEnd;
         this.playerUuids = new HashSet<>();
+        this.spectators = new HashSet<>();
         this.states = new PlayerStateManager();
         this.deaths = new DeathManager();
         this.swap = new SwapManager(plugin);
@@ -54,7 +57,7 @@ public class MatchManager {
         for (Player player : players) {
             player.teleport(gameWorld.getSpawnLocation());
             states.save(player);
-            PlayerUtil.resetToSurvival(player);
+            PlayerState.resetForMatch(player);
         }
 
         deaths.init(playerUuids);
@@ -67,18 +70,23 @@ public class MatchManager {
 
     public void onPlayerRespawn(Player player) {
         if (!playerUuids.contains(player.getUniqueId())) return;
+
+        if (spectators.contains(player.getUniqueId())) {
+            player.setGameMode(GameMode.SPECTATOR);
+        }
         player.teleport(gameWorld.getSpawnLocation());
+        refreshScoreboard();
+        checkWinner();
     }
 
     public void onPlayerDeath(Player player) {
         if (!playerUuids.contains(player.getUniqueId())) return;
-        if (player.getGameMode() == GameMode.SPECTATOR) return;
 
         int deathCount = deaths.add(player.getUniqueId());
         int max = cfg.maxDeaths();
 
         if (deathCount >= max) {
-            player.setGameMode(GameMode.SPECTATOR);
+            spectators.add(player.getUniqueId());
             player.sendMessage(messages.prefixed("eliminated"));
             broadcast(messages.prefixed("player-eliminated", "player", player.getName()));
             checkWinner();
@@ -93,6 +101,7 @@ public class MatchManager {
         if (!playerUuids.contains(player.getUniqueId())) return;
 
         playerUuids.remove(player.getUniqueId());
+        spectators.remove(player.getUniqueId());
         deaths.remove(player.getUniqueId());
         player.setScoreboard(Bukkit.getScoreboardManager().getMainScoreboard());
 
@@ -181,6 +190,7 @@ public class MatchManager {
         plugin.getWorldManager().deleteWorld(gameWorld);
         deaths.clear();
         states.clear();
+        spectators.clear();
         playerUuids.clear();
         onEnd.run();
     }

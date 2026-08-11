@@ -3,7 +3,6 @@ package dev.lokspel.deathswap.util;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.title.Title;
-import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
 
 import java.time.Duration;
@@ -26,15 +25,6 @@ public final class PlayerUtil {
     public static Player getOnlinePlayer(UUID uuid) {
         Player player = org.bukkit.Bukkit.getPlayer(uuid);
         return (player != null && player.isOnline()) ? player : null;
-    }
-
-    public static void resetToSurvival(Player player) {
-        player.setGameMode(GameMode.SURVIVAL);
-        player.setHealth(20.0);
-        player.setFoodLevel(20);
-        player.setSaturation(5.0f);
-        player.setFireTicks(0);
-        player.setRemainingAir(player.getMaximumAir());
     }
 
     public static void showCountdownTitle(Player player, Component message) {

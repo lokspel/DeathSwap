@@ -22,6 +22,8 @@ public class ConfigManager {
     private int fastStartDelay;
     private boolean pvpEnabled;
     private boolean isolateChat;
+    private int worldCount;
+    private int preGenerateRadius;
     private String countdownTickSound;
     private String countdownGoSound;
     private String swapSound;
@@ -52,6 +54,9 @@ public class ConfigManager {
         fastStartDelay = cfg.getInt("game.fast-start-delay", 3);
         pvpEnabled = cfg.getBoolean("game.pvp-enabled", true);
         isolateChat = cfg.getBoolean("game.isolate-chat", true);
+
+        worldCount = cfg.getInt("worlds.count", 5);
+        preGenerateRadius = cfg.getInt("worlds.pre-generate-radius", 8);
 
         countdownTickSound = cfg.getString("sounds.countdown-tick", "entity.note.pling");
         countdownGoSound = cfg.getString("sounds.countdown-go", "entity.experience_orb.pickup");
@@ -98,6 +103,8 @@ public class ConfigManager {
     public int fastStartDelay() { return fastStartDelay; }
     public boolean pvpEnabled() { return pvpEnabled; }
     public boolean isolateChat() { return isolateChat; }
+    public int worldCount() { return worldCount; }
+    public int preGenerateRadius() { return preGenerateRadius; }
     public String countdownTickSound() { return countdownTickSound; }
     public String countdownGoSound() { return countdownGoSound; }
     public String swapSound() { return swapSound; }

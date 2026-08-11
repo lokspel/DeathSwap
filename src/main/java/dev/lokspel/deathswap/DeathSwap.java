@@ -14,6 +14,7 @@ import dev.lokspel.deathswap.events.EntityDamageListener;
 import dev.lokspel.deathswap.events.PlayerDeathListener;
 import dev.lokspel.deathswap.events.PlayerQuitListener;
 import dev.lokspel.deathswap.events.PlayerRespawnListener;
+import dev.lokspel.deathswap.events.WorldInitListener;
 import dev.lokspel.deathswap.game.GameManager;
 import dev.lokspel.deathswap.world.WorldManager;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -33,6 +34,8 @@ public class DeathSwap extends JavaPlugin {
         instance = this;
 
         configManager = new ConfigManager(this);
+
+        getServer().getPluginManager().registerEvents(new WorldInitListener(), this);
         worldManager = new WorldManager(this);
         gameManager = new GameManager(this);
 

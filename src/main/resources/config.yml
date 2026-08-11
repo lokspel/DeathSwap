@@ -19,3 +19,7 @@ sounds:
   countdown-go: entity.experience_orb.pickup
   swap: entity.enderman.teleport
   win: ui.toast.challenge_complete
+
+worlds:
+  count: 5                # Number of persistent reusable worlds (each = one concurrent match)
+  pre-generate-radius: 8  # Pre-generate spawn chunks around the spawn, 0 = off
