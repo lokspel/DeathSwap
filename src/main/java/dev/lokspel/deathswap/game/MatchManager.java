@@ -52,7 +52,7 @@ public class MatchManager {
             player.sendMessage(messages.prefixed("world-preparing"));
         }
 
-        gameWorld = plugin.getWorldManager().createGameWorld();
+        gameWorld = plugin.getWorldPool().createGameWorld();
 
         for (Player player : players) {
             player.teleport(gameWorld.getSpawnLocation());
@@ -71,12 +71,17 @@ public class MatchManager {
     public void onPlayerRespawn(Player player) {
         if (!playerUuids.contains(player.getUniqueId())) return;
 
-        if (spectators.contains(player.getUniqueId())) {
+        boolean eliminated = spectators.contains(player.getUniqueId());
+        if (eliminated) {
             player.setGameMode(GameMode.SPECTATOR);
         }
+
         player.teleport(gameWorld.getSpawnLocation());
         refreshScoreboard();
-        checkWinner();
+
+        if (eliminated) {
+            checkWinner();
+        }
     }
 
     public void onPlayerDeath(Player player) {
@@ -106,7 +111,7 @@ public class MatchManager {
         player.setScoreboard(Bukkit.getScoreboardManager().getMainScoreboard());
 
         if (teleport) {
-            plugin.getWorldManager().teleportToLobby(player);
+            plugin.getWorldPool().teleportToLobby(player);
         }
 
         refreshScoreboard();
@@ -184,10 +189,10 @@ public class MatchManager {
         scoreboard.remove(playerUuids);
         for (Player player : getOnlinePlayers()) {
             states.restore(player);
-            plugin.getWorldManager().teleportToLobby(player);
+            plugin.getWorldPool().teleportToLobby(player);
         }
 
-        plugin.getWorldManager().deleteWorld(gameWorld);
+        plugin.getWorldPool().deleteWorld(gameWorld);
         deaths.clear();
         states.clear();
         spectators.clear();

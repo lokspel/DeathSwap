@@ -75,7 +75,7 @@ public class GameManager {
         Set<Player> players = lobby.getOnlinePlayers();
         if (players.size() < 2) return;
 
-        if (!plugin.getWorldManager().hasFreeSlot()) {
+        if (!plugin.getWorldPool().hasFreeInstance()) {
             var msg = plugin.getConfigManager().getMessages().prefixed("worlds-busy");
             for (Player player : players) {
                 player.sendMessage(msg);

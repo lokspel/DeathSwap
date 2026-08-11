@@ -6,30 +6,30 @@ import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
 
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.ThreadLocalRandom;
 
 /**
- * Facade for matches over a pool of reusable worlds. Each world can host one
- * concurrent match; worlds are created asynchronously at startup and their
- * chunks reset when a match ends.
+ * Facade over a pool of reusable game worlds. Each world can host one
+ * concurrent match; worlds are created at startup and their chunks reset when a
+ * match ends.
  */
-public class WorldManager {
+public class WorldPool {
 
     private final DeathSwap plugin;
-    private final WorldResetter resetter;
-    private final List<WorldSlot> slots = new ArrayList<>();
+    private final WorldReset reset;
+    private final List<WorldInstance> instances = new ArrayList<>();
 
-    public WorldManager(DeathSwap plugin) {
+    public WorldPool(DeathSwap plugin) {
         this.plugin = plugin;
-        this.resetter = new WorldResetter(plugin);
+        this.reset = new WorldReset(plugin);
 
         int count = Math.max(1, plugin.getConfigManager().worldCount());
+        WorldLoader loader = new WorldLoader();
         for (int i = 0; i < count; i++) {
-            slots.add(new WorldSlot("deathswap_" + i));
+            instances.add(new WorldInstance("deathswap_" + i, loader));
         }
         warmUp();
     }
@@ -40,15 +40,15 @@ public class WorldManager {
      * @return the acquired world, or {@code null} if all worlds are busy
      */
     public World createGameWorld() {
-        WorldSlot slot = findReadySlot();
-        if (slot == null) return null;
+        WorldInstance instance = findReadyInstance();
+        if (instance == null) return null;
 
-        slot.acquire();
-        return slot.getWorld();
+        instance.acquire();
+        return instance.getWorld();
     }
 
-    public boolean hasFreeSlot() {
-        return findFreeSlot() != null;
+    public boolean hasFreeInstance() {
+        return findFreeInstance() != null;
     }
 
     /**
@@ -58,15 +58,14 @@ public class WorldManager {
     public void deleteWorld(World world) {
         if (world == null) return;
 
-        for (WorldSlot slot : slots) {
-            if (!slot.owns(world)) continue;
+        for (WorldInstance instance : instances) {
+            if (!instance.owns(world)) continue;
 
             for (Player player : world.getPlayers()) {
                 teleportToLobby(player);
             }
 
-            Path regionFolder = world.getWorldFolder().toPath().resolve("region");
-            slot.release(regionFolder, resetter, () -> loadSlot(slot));
+            reset.reset(instance, () -> loadInstance(instance));
             return;
         }
     }
@@ -77,44 +76,43 @@ public class WorldManager {
             () -> Bukkit.getWorlds().getFirst().getSpawnLocation()));
     }
 
-    private WorldSlot findFreeSlot() {
-        for (WorldSlot slot : slots) {
-            if (slot.isFree()) return slot;
+    private WorldInstance findFreeInstance() {
+        for (WorldInstance instance : instances) {
+            if (instance.isFree()) return instance;
         }
         return null;
     }
 
     /**
-     * Finds a free slot whose world is already loaded and spawn pre-generated,
-     * so no world is ever created or generated on the server thread.
+     * Finds a free instance whose world is already loaded and spawn
+     * pre-generated, so no world is ever created or generated on the server
+     * thread.
      */
-    private WorldSlot findReadySlot() {
-        List<WorldSlot> ready = new ArrayList<>();
-        for (WorldSlot slot : slots) {
-            if (slot.isFree() && slot.getWorld() != null) ready.add(slot);
+    private WorldInstance findReadyInstance() {
+        List<WorldInstance> ready = new ArrayList<>();
+        for (WorldInstance instance : instances) {
+            if (instance.isFree() && instance.getWorld() != null) ready.add(instance);
         }
         if (ready.isEmpty()) return null;
         return ready.get(ThreadLocalRandom.current().nextInt(ready.size()));
     }
 
     /**
-     * Loads (or reloads) a world and kicks off asynchronous spawn pre-generation.
-     * Must be called on the main thread: {@code Bukkit.createWorld} requires it
-     * (Paper fires WorldInitEvent synchronously), but it is cheap because
-     * spawn-chunk generation is disabled for our worlds.
+     * Loads (or reloads) a world and kicks off asynchronous spawn
+     * pre-generation.
      */
-    private void loadSlot(WorldSlot slot) {
-        slot.load();
-        preGenerateSpawn(slot.getWorld());
+    private void loadInstance(WorldInstance instance) {
+        instance.load();
+        preGenerateSpawn(instance.getWorld());
     }
 
     /**
-     * Creates all reusable worlds gradually on the main thread at startup.
+     * Creates all reusable worlds on the main thread at startup. Cheap because
+     * spawn-chunk generation is disabled for our worlds.
      */
     private void warmUp() {
-        for (int i = 0; i < slots.size(); i++) {
-            WorldSlot slot = slots.get(i);
-            Bukkit.getGlobalRegionScheduler().runDelayed(plugin, task -> loadSlot(slot), 20L + i * 40L);
+        for (WorldInstance instance : instances) {
+            loadInstance(instance);
         }
     }
 

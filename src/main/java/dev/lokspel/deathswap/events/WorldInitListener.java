@@ -8,7 +8,7 @@ import org.bukkit.event.world.WorldInitEvent;
 /**
  * Skips the expensive synchronous spawn-chunk generation when a game world is
  * created or reloaded. Spawn area is pre-generated asynchronously by the
- * WorldManager afterwards, keeping {@code Bukkit.createWorld} near-instant.
+ * WorldPool afterwards, keeping {@code Bukkit.createWorld} near-instant.
  */
 public class WorldInitListener implements Listener {
 

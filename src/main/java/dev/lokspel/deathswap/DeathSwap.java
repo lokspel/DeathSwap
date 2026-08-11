@@ -16,7 +16,7 @@ import dev.lokspel.deathswap.events.PlayerQuitListener;
 import dev.lokspel.deathswap.events.PlayerRespawnListener;
 import dev.lokspel.deathswap.events.WorldInitListener;
 import dev.lokspel.deathswap.game.GameManager;
-import dev.lokspel.deathswap.world.WorldManager;
+import dev.lokspel.deathswap.world.WorldPool;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.List;
@@ -26,7 +26,7 @@ public class DeathSwap extends JavaPlugin {
 
     private static DeathSwap instance;
     private ConfigManager configManager;
-    private WorldManager worldManager;
+    private WorldPool worldPool;
     private GameManager gameManager;
 
     @Override
@@ -36,7 +36,7 @@ public class DeathSwap extends JavaPlugin {
         configManager = new ConfigManager(this);
 
         getServer().getPluginManager().registerEvents(new WorldInitListener(), this);
-        worldManager = new WorldManager(this);
+        worldPool = new WorldPool(this);
         gameManager = new GameManager(this);
 
         CommandDispatcher dispatcher = new CommandDispatcher(this, List.of(
@@ -71,8 +71,8 @@ public class DeathSwap extends JavaPlugin {
         return configManager;
     }
 
-    public WorldManager getWorldManager() {
-        return worldManager;
+    public WorldPool getWorldPool() {
+        return worldPool;
     }
 
     public GameManager getGameManager() {
