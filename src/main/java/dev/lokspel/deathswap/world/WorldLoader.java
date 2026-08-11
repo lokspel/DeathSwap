@@ -6,8 +6,9 @@ import org.bukkit.WorldCreator;
 
 /**
  * Creates or loads a game world by name. Must be called on the main thread:
- * {@code Bukkit.createWorld} requires it, but it is cheap because spawn-chunk
- * generation is disabled for our worlds.
+ * {@code Bukkit.createWorld} requires it. Modern Paper no longer pre-generates
+ * a large spawn area synchronously, so world creation is cheap; the spawn
+ * region is pre-generated asynchronously afterwards.
  */
 final class WorldLoader {
 

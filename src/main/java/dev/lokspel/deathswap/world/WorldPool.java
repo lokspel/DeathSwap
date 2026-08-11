@@ -107,8 +107,8 @@ public class WorldPool {
     }
 
     /**
-     * Creates all reusable worlds on the main thread at startup. Cheap because
-     * spawn-chunk generation is disabled for our worlds.
+     * Creates all reusable worlds on the main thread at startup. Modern Paper
+     * does not pre-generate a large spawn area synchronously, so this is cheap.
      */
     private void warmUp() {
         for (WorldInstance instance : instances) {

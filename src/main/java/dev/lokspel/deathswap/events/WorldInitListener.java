@@ -6,9 +6,8 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.world.WorldInitEvent;
 
 /**
- * Skips the expensive synchronous spawn-chunk generation when a game world is
- * created or reloaded. Spawn area is pre-generated asynchronously by the
- * WorldPool afterwards, keeping {@code Bukkit.createWorld} near-instant.
+ * Disables autosave for game worlds; their chunks are reset when a match ends,
+ * so saving them to disk is pointless.
  */
 public class WorldInitListener implements Listener {
 
@@ -16,7 +15,6 @@ public class WorldInitListener implements Listener {
     public void handle(WorldInitEvent event) {
         World world = event.getWorld();
         if (world.getName().startsWith("deathswap_")) {
-            world.setKeepSpawnInMemory(false);
             world.setAutoSave(false);
         }
     }
