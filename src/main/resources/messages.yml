@@ -5,40 +5,41 @@
 prefix: "<gold>[DeathSwap]</gold> "
 
 # Admin
-config-reloaded: "<green>Configuration reloaded successfully.</green>"
-lobby-set: "<green>Lobby location has been set.</green>"
+config-reloaded: "%prefix%<green>Configuration reloaded successfully.</green>"
+lobby-set: "%prefix%<green>Lobby location has been set.</green>"
 
 # Command Errors
-usage: "<red>Usage: /deathswap <join|leave|start|stop|reload|setlobby></red>"
+usage: "%prefix%<red>Usage: /deathswap <join|leave|start|stop|reload|setlobby></red>"
 player-only: "<red>Only players can use this command.</red>"
 no-permission: "<red>You don't have permission to use this command.</red>"
 
 # Join / Leave
-joined: "<green>You joined the DeathSwap game.</green>"
-already-joined: "<red>You are already in the game.</red>"
-already-queue: "<yellow>You are already waiting for a game.</yellow>"
-not-joined: "<red>You are not in the game.</red>"
-left: "<gray>You left the DeathSwap game.</gray>"
+joined: "%prefix%<green>You joined the DeathSwap game.</green>"
+already-joined: "%prefix%<red>You are already in the game.</red>"
+already-queue: "%prefix%<yellow>You are already waiting for a game.</yellow>"
+not-joined: "%prefix%<red>You are not in the game.</red>"
+left: "%prefix%<gray>You left the DeathSwap game.</gray>"
 
 # Game Start
-not-enough-players: "<red>Not enough players. At least 2 players are required.</red>"
-worlds-busy: "<red>No free world slots. Please try again in a moment.</red>"
-starting: "<white>Game starting in</white> <gold><seconds></gold><white>s...</white>"
-world-preparing: "<gray><italic>Preparing the world...</italic></gray>"
-game-started: "<green>The DeathSwap game has started!</green>"
+not-enough-players: "%prefix%<red>Not enough players. At least 2 players are required.</red>"
+worlds-busy: "%prefix%<red>No free world slots. Please try again in a moment.</red>"
+starting: "<gray>Game starting in</gray> <white><seconds></white><gray>s...</gray>"
+needs-players: "<gray>Waiting for players</gray> <white>(<players>/<required>)</white>"
+world-preparing: "%prefix%<gray><italic>Preparing the world...</italic></gray>"
+game-started: "%prefix%<green>The DeathSwap game has started!</green>"
 already-running: "<red>A game is already running.</red>"
 
 # In-Game
 countdown: "<white>Swapping in</white> <gold><seconds></gold><white>s...</white>"
-swap-message: "<gray><italic>Swapping positions...</italic></gray>"
-eliminated: "<red>You have been eliminated!</red>"
-player-eliminated: "<white><player></white> <red>has been eliminated.</red>"
-deaths-left: "<gray>Deaths remaining:</gray> <red><deaths></red>"
-winner: "<gold><player></gold> <green>has won the DeathSwap game!</green>"
+swap-message: "%prefix%<gray><italic>Swapping positions...</italic></gray>"
+eliminated: "%prefix%<red>You have been eliminated!</red>"
+player-eliminated: "%prefix%<white><player></white> <red>has been eliminated.</red>"
+deaths-left: "%prefix%<gray>Deaths remaining:</gray> <red><deaths></red>"
+winner: "%prefix%<gold><player></gold> <green>has won the DeathSwap game!</green>"
 
 # Game Stop
 game-stopped: "<red>The DeathSwap game has been stopped.</red>"
-not-running: "<red>No game is currently running.</red>"
+not-running: "%prefix%<red>No game is currently running.</red>"
 
 # Scoreboard
 scoreboard-title: "<gold>Death Count</gold>"

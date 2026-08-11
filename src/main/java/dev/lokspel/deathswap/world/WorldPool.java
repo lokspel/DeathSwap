@@ -134,7 +134,7 @@ public class WorldPool {
         int centerX = spawn.getBlockX() >> 4;
         int centerZ = spawn.getBlockZ() >> 4;
 
-        Bukkit.getAsyncScheduler().runNow(plugin, task -> {
+        Bukkit.getAsyncScheduler().runNow(plugin, _ -> {
             for (int x = centerX - radius; x <= centerX + radius; x++) {
                 for (int z = centerZ - radius; z <= centerZ + radius; z++) {
                     world.getChunkAtAsync(x, z).join();

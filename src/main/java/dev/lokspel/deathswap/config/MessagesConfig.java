@@ -27,20 +27,26 @@ public final class MessagesConfig {
         );
     }
 
-    public Component prefixed(String key) {
-        return parse(
-                config.getString(PREFIX, "") +
-                        config.getString(key, "")
+    public Component get(String key, String p1, String v1, String p2, String v2) {
+        return miniMessage.deserialize(
+                config.getString(key, "").replace("<" + p1 + ">", v1).replace("<" + p2 + ">", v2)
         );
+    }
+
+    public Component prefixed(String key) {
+        return parse(replacePrefix(config.getString(key, "")));
     }
 
     public Component prefixed(String key, String placeholder, String value) {
         return parse(
-                config.getString(PREFIX, "") +
-                        config.getString(key, ""),
+                replacePrefix(config.getString(key, "")),
                 placeholder,
                 value
         );
+    }
+
+    private String replacePrefix(String text) {
+        return text.replace("%prefix%", config.getString(PREFIX, ""));
     }
 
     private Component parse(String text) {

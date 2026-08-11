@@ -32,6 +32,10 @@ public class LobbyManager {
         player.setGameMode(GameMode.SURVIVAL);
         player.sendMessage(plugin.getMainConfig().messages().prefixed("joined"));
 
+        if (players.size() < plugin.getMainConfig().game().minPlayersToStart()) {
+            showNeedsPlayers();
+        }
+
         if (startTask != null && players.size() >= plugin.getMainConfig().game().minPlayersFastStart()) {
             int target = plugin.getMainConfig().game().fastStartDelay();
             if (remainingCountdown > target) {
@@ -44,6 +48,9 @@ public class LobbyManager {
         if (!players.remove(uuid)) return;
         restoreGameMode(uuid);
         cancelTask();
+        if (players.size() < plugin.getMainConfig().game().minPlayersToStart()) {
+            showNeedsPlayers();
+        }
     }
 
     public boolean contains(UUID uuid) {
@@ -92,14 +99,27 @@ public class LobbyManager {
                 return;
             }
 
-            var msg = cfg.messages().get("starting", "seconds", String.valueOf(remainingCountdown - 1));
-
-            for (Player player : PlayerUtil.getOnlinePlayers(players)) {
-                PlayerUtil.showCountdownTitle(player, msg);
+            if (cfg.game().actionbarEnabled()) {
+                var msg = cfg.messages().get("starting", "seconds", String.valueOf(remainingCountdown - 1));
+                for (Player player : PlayerUtil.getOnlinePlayers(players)) {
+                    PlayerUtil.showActionBar(player, msg);
+                }
             }
 
             remainingCountdown--;
         }, 0L, 20L);
+    }
+
+    private void showNeedsPlayers() {
+        if (!plugin.getMainConfig().game().actionbarEnabled()) return;
+        int required = plugin.getMainConfig().game().minPlayersToStart();
+        var msg = plugin.getMainConfig().messages().get(
+                "needs-players",
+                "players", String.valueOf(players.size()),
+                "required", String.valueOf(required));
+        for (Player player : getOnlinePlayers()) {
+            PlayerUtil.showActionBar(player, msg);
+        }
     }
 
     private void restoreGameMode(UUID uuid) {

@@ -2,7 +2,10 @@ package dev.lokspel.deathswap.util;
 
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.kyori.adventure.title.Title;
+import net.md_5.bungee.api.ChatMessageType;
+import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.entity.Player;
 
 import java.time.Duration;
@@ -30,5 +33,10 @@ public final class PlayerUtil {
     public static void showCountdownTitle(Player player, Component message) {
         player.showTitle(Title.title(message, Component.empty(),
             Title.Times.times(Duration.ZERO, Duration.ofSeconds(1), Duration.ZERO)));
+    }
+
+    public static void showActionBar(Player player, Component message) {
+        String legacy = LegacyComponentSerializer.legacySection().serialize(message);
+        player.spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent.fromLegacyText(legacy));
     }
 }

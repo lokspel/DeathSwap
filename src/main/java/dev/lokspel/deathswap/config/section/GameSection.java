@@ -52,4 +52,12 @@ public class GameSection {
     public boolean isolateChat() {
         return config().getBoolean(PATH + "isolate-chat", true);
     }
+
+    public boolean scoreboardEnabled() {
+        return config().getBoolean(PATH + "scoreboard-enabled", true);
+    }
+
+    public boolean actionbarEnabled() {
+        return config().getBoolean(PATH + "actionbar-enabled", true);
+    }
 }

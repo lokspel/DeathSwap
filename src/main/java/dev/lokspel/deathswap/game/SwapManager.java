@@ -38,6 +38,7 @@ public class SwapManager {
         countdownRemaining = cfg.game().countdownSeconds();
         var messages = cfg.messages();
         var tickSound = SoundUtil.minecraft(cfg.sounds().countdownTick());
+        boolean showHud = cfg.game().actionbarEnabled();
 
         countdownTask = Bukkit.getScheduler().runTaskTimer(plugin, () -> {
             if (countdownRemaining <= 0) {
@@ -51,7 +52,9 @@ public class SwapManager {
             var alive = aliveSupplier.get();
 
             for (Player player : alive) {
-                PlayerUtil.showCountdownTitle(player, msg);
+                if (showHud) {
+                    PlayerUtil.showCountdownTitle(player, msg);
+                }
                 player.playSound(tickSound);
             }
 

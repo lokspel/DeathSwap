@@ -14,6 +14,10 @@ game:
   pvp-enabled: false           # Allow players to damage each other
   isolate-chat: true           # Keep chat between players in the same match
 
+  # Display Options
+  scoreboard-enabled: true    # Show the in-match sidebar scoreboard
+  actionbar-enabled: true     # Show HUD countdowns (lobby start + swap warning)
+
 sounds:
   countdown-tick: entity.note.pling
   countdown-go: entity.experience_orb.pickup

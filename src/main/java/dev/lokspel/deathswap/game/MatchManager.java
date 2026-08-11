@@ -62,8 +62,10 @@ public class MatchManager {
         }
 
         deaths.init(playerUuids);
-        scoreboard.init(messages.get("scoreboard-title"));
-        refreshScoreboard();
+        if (cfg.game().scoreboardEnabled()) {
+            scoreboard.init(messages.get("scoreboard-title"));
+            refreshScoreboard();
+        }
 
         scheduleNextSwap();
         broadcast(messages.prefixed("game-started"));
@@ -147,6 +149,7 @@ public class MatchManager {
     }
 
     private void refreshScoreboard() {
+        if (!cfg.game().scoreboardEnabled()) return;
         scoreboard.update(deaths.getAll());
         scoreboard.apply(deaths.getAll().keySet());
     }
