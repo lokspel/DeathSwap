@@ -3,6 +3,7 @@ package dev.lokspel.deathswap.events;
 import dev.lokspel.deathswap.DeathSwap;
 import dev.lokspel.deathswap.game.GameManager;
 import dev.lokspel.deathswap.game.MatchManager;
+import org.bukkit.Location;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -20,7 +21,10 @@ public class PlayerRespawnListener implements Listener {
     public void handle(PlayerRespawnEvent event) {
         MatchManager match = game.findMatchByPlayer(event.getPlayer().getUniqueId());
         if (match != null) {
-            match.onPlayerRespawn(event.getPlayer());
+            Location location = match.onPlayerRespawn(event.getPlayer());
+            if (location != null) {
+                event.setRespawnLocation(location);
+            }
         }
     }
 }

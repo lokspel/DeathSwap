@@ -61,6 +61,9 @@ public class DeathSwap extends JavaPlugin {
         if (gameManager != null) {
             gameManager.stop();
         }
+        if (worldPool != null) {
+            worldPool.shutdown();
+        }
     }
 
     public static DeathSwap getInstance() {

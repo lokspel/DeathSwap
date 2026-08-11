@@ -44,6 +44,19 @@ final class WorldReset {
         });
     }
 
+    /**
+     * Synchronously unloads and clears an instance's world. Used on shutdown,
+     * where an asynchronous reset would not finish before the server exits.
+     */
+    void clearNow(WorldInstance instance) {
+        World world = instance.getWorld();
+        if (world == null) return;
+
+        Path regionFolder = world.getWorldFolder().toPath().resolve("region");
+        Bukkit.unloadWorld(world, false);
+        clearRegionFiles(regionFolder);
+    }
+
     private void clearRegionFiles(Path regionFolder) {
         if (!Files.isDirectory(regionFolder)) return;
 

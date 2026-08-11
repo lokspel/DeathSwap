@@ -76,6 +76,16 @@ public class WorldPool {
             () -> Bukkit.getWorlds().getFirst().getSpawnLocation()));
     }
 
+    /**
+     * Clears all pooled worlds synchronously on shutdown, so the next server
+     * start is fresh (no leftover builds from the previous session).
+     */
+    public void shutdown() {
+        for (WorldInstance instance : instances) {
+            reset.clearNow(instance);
+        }
+    }
+
     private WorldInstance findFreeInstance() {
         for (WorldInstance instance : instances) {
             if (instance.isFree()) return instance;

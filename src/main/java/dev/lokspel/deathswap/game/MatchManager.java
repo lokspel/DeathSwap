@@ -11,6 +11,7 @@ import dev.lokspel.deathswap.util.SoundUtil;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
+import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
 
@@ -68,20 +69,26 @@ public class MatchManager {
         broadcast(messages.prefixed("game-started"));
     }
 
-    public void onPlayerRespawn(Player player) {
-        if (!playerUuids.contains(player.getUniqueId())) return;
+    /**
+     * Handles a respawn of an in-match player. Returns the location to respawn
+     * at (the game world spawn), or {@code null} if the player is not in the
+     * match. The caller must apply it via {@code PlayerRespawnEvent#setRespawnLocation},
+     * as a direct teleport is overridden by the event afterwards.
+     */
+    public Location onPlayerRespawn(Player player) {
+        if (!playerUuids.contains(player.getUniqueId())) return null;
 
-        boolean eliminated = spectators.contains(player.getUniqueId());
-        if (eliminated) {
+        if (spectators.contains(player.getUniqueId())) {
             player.setGameMode(GameMode.SPECTATOR);
         }
 
-        player.teleport(gameWorld.getSpawnLocation());
+        Location location = gameWorld.getSpawnLocation();
         refreshScoreboard();
 
-        if (eliminated) {
+        if (spectators.contains(player.getUniqueId())) {
             checkWinner();
         }
+        return location;
     }
 
     public void onPlayerDeath(Player player) {
