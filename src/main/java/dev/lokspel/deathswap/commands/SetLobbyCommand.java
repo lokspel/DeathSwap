@@ -1,16 +1,16 @@
 package dev.lokspel.deathswap.commands;
 
 import dev.lokspel.deathswap.DeathSwap;
-import dev.lokspel.deathswap.config.ConfigManager;
+import dev.lokspel.deathswap.config.MainConfig;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 public class SetLobbyCommand implements SubCommand {
 
-    private final ConfigManager config;
+    private final MainConfig config;
 
     public SetLobbyCommand(DeathSwap plugin) {
-        this.config = plugin.getConfigManager();
+        this.config = plugin.getMainConfig();
     }
 
     @Override
@@ -18,8 +18,8 @@ public class SetLobbyCommand implements SubCommand {
         Player player = SubCommand.requirePlayer(sender);
         if (player == null) return true;
         if (SubCommand.requirePermission(sender, "deathswap.setlobby")) return true;
-        config.setLobbyLocation(player.getLocation());
-        sender.sendMessage(config.getMessages().prefixed("lobby-set"));
+        config.lobby().set(player.getLocation());
+        sender.sendMessage(config.messages().prefixed("lobby-set"));
         return true;
     }
 }

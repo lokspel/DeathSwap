@@ -25,11 +25,11 @@ public class GameManager {
         UUID uuid = player.getUniqueId();
 
         if (findMatchByPlayer(uuid) != null) {
-            player.sendMessage(plugin.getConfigManager().getMessages().prefixed("already-joined"));
+            player.sendMessage(plugin.getMainConfig().messages().prefixed("already-joined"));
             return;
         }
         if (lobby.contains(uuid)) {
-            player.sendMessage(plugin.getConfigManager().getMessages().prefixed("already-queue"));
+            player.sendMessage(plugin.getMainConfig().messages().prefixed("already-queue"));
             return;
         }
 
@@ -53,7 +53,7 @@ public class GameManager {
             return;
         }
 
-        player.sendMessage(plugin.getConfigManager().getMessages().prefixed("left"));
+        player.sendMessage(plugin.getMainConfig().messages().prefixed("left"));
     }
 
     public void onPlayerDeath(Player player) {
@@ -76,7 +76,7 @@ public class GameManager {
         if (players.size() < 2) return;
 
         if (!plugin.getWorldPool().hasFreeInstance()) {
-            var msg = plugin.getConfigManager().getMessages().prefixed("worlds-busy");
+            var msg = plugin.getMainConfig().messages().prefixed("worlds-busy");
             for (Player player : players) {
                 player.sendMessage(msg);
             }

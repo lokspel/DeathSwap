@@ -1,22 +1,22 @@
 package dev.lokspel.deathswap.commands;
 
 import dev.lokspel.deathswap.DeathSwap;
-import dev.lokspel.deathswap.config.ConfigManager;
+import dev.lokspel.deathswap.config.MainConfig;
 import org.bukkit.command.CommandSender;
 
 public class ReloadCommand implements SubCommand {
 
-    private final ConfigManager config;
+    private final MainConfig config;
 
     public ReloadCommand(DeathSwap plugin) {
-        this.config = plugin.getConfigManager();
+        this.config = plugin.getMainConfig();
     }
 
     @Override
     public boolean execute(CommandSender sender, String[] args) {
         if (SubCommand.requirePermission(sender, "deathswap.reload")) return true;
         config.load();
-        sender.sendMessage(config.getMessages().prefixed("config-reloaded"));
+        sender.sendMessage(config.messages().prefixed("config-reloaded"));
         return true;
     }
 }

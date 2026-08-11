@@ -16,7 +16,7 @@ public class StopCommand implements SubCommand {
     public boolean execute(CommandSender sender, String[] args) {
         if (SubCommand.requirePermission(sender, "deathswap.stop")) return true;
         if (!game.hasActivity()) {
-            sender.sendMessage(DeathSwap.getInstance().getConfigManager().getMessages().prefixed("not-running"));
+            sender.sendMessage(DeathSwap.getInstance().getMainConfig().messages().prefixed("not-running"));
             return true;
         }
         game.stop();

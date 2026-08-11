@@ -30,10 +30,10 @@ public class LobbyManager {
 
         previousGameModes.put(player.getUniqueId(), player.getGameMode());
         player.setGameMode(GameMode.SURVIVAL);
-        player.sendMessage(plugin.getConfigManager().getMessages().prefixed("joined"));
+        player.sendMessage(plugin.getMainConfig().messages().prefixed("joined"));
 
-        if (startTask != null && players.size() >= plugin.getConfigManager().minPlayersFastStart()) {
-            int target = plugin.getConfigManager().fastStartDelay();
+        if (startTask != null && players.size() >= plugin.getMainConfig().game().minPlayersFastStart()) {
+            int target = plugin.getMainConfig().game().fastStartDelay();
             if (remainingCountdown > target) {
                 remainingCountdown = target;
             }
@@ -72,12 +72,12 @@ public class LobbyManager {
     }
 
     public void tryAutoStart(Runnable onStart) {
-        var cfg = plugin.getConfigManager();
-        if (startTask != null || players.size() < cfg.minPlayersToStart()) return;
+        var cfg = plugin.getMainConfig();
+        if (startTask != null || players.size() < cfg.game().minPlayersToStart()) return;
 
-        remainingCountdown = cfg.startDelay();
-        if (players.size() >= cfg.minPlayersFastStart()) {
-            remainingCountdown = Math.min(remainingCountdown, cfg.fastStartDelay());
+        remainingCountdown = cfg.game().startDelay();
+        if (players.size() >= cfg.game().minPlayersFastStart()) {
+            remainingCountdown = Math.min(remainingCountdown, cfg.game().fastStartDelay());
         }
 
         startTask = Bukkit.getScheduler().runTaskTimer(plugin, () -> {
@@ -87,12 +87,12 @@ public class LobbyManager {
                 return;
             }
 
-            if (players.size() < cfg.minPlayersToStart()) {
+            if (players.size() < cfg.game().minPlayersToStart()) {
                 cancelTask();
                 return;
             }
 
-            var msg = cfg.getMessages().message("starting", "seconds", String.valueOf(remainingCountdown - 1));
+            var msg = cfg.messages().get("starting", "seconds", String.valueOf(remainingCountdown - 1));
 
             for (Player player : PlayerUtil.getOnlinePlayers(players)) {
                 PlayerUtil.showCountdownTitle(player, msg);

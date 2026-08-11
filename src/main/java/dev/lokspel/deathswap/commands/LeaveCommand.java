@@ -18,7 +18,7 @@ public class LeaveCommand implements SubCommand {
         Player player = SubCommand.requirePlayer(sender);
         if (player == null) return true;
         if (!game.isParticipant(player)) {
-            sender.sendMessage(DeathSwap.getInstance().getConfigManager().getMessages().prefixed("not-joined"));
+            sender.sendMessage(DeathSwap.getInstance().getMainConfig().messages().prefixed("not-joined"));
             return true;
         }
         game.leave(player);

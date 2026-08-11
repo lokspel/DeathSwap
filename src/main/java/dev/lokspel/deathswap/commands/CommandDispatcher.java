@@ -27,13 +27,13 @@ public class CommandDispatcher implements CommandExecutor {
     @Override
     public boolean onCommand(@NonNull CommandSender sender, @NonNull Command command, @NonNull String label, String[] args) {
         if (args.length == 0) {
-            sender.sendMessage(plugin.getConfigManager().getMessages().prefixed("usage"));
+            sender.sendMessage(plugin.getMainConfig().messages().prefixed("usage"));
             return true;
         }
 
         SubCommand sub = subcommands.get(args[0].toLowerCase());
         if (sub == null) {
-            sender.sendMessage(plugin.getConfigManager().getMessages().prefixed("usage"));
+            sender.sendMessage(plugin.getMainConfig().messages().prefixed("usage"));
             return true;
         }
 

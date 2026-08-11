@@ -23,8 +23,8 @@ public class SwapManager {
     }
 
     public void scheduleNext(Runnable onSwapComplete, Supplier<Set<Player>> aliveSupplier) {
-        var cfg = plugin.getConfigManager();
-        long delay = Math.max(1, (long) cfg.swapInterval() - cfg.countdownSeconds()) * 20L;
+        var cfg = plugin.getMainConfig();
+        long delay = Math.max(1, (long) cfg.game().swapInterval() - cfg.game().countdownSeconds()) * 20L;
 
         delayTask = Bukkit.getScheduler().runTaskLater(plugin, () -> {
             delayTask = null;
@@ -34,10 +34,10 @@ public class SwapManager {
     }
 
     private void startCountdown(Runnable onSwapComplete, Supplier<Set<Player>> aliveSupplier) {
-        var cfg = plugin.getConfigManager();
-        countdownRemaining = cfg.countdownSeconds();
-        var messages = cfg.getMessages();
-        var tickSound = SoundUtil.minecraft(cfg.countdownTickSound());
+        var cfg = plugin.getMainConfig();
+        countdownRemaining = cfg.game().countdownSeconds();
+        var messages = cfg.messages();
+        var tickSound = SoundUtil.minecraft(cfg.sounds().countdownTick());
 
         countdownTask = Bukkit.getScheduler().runTaskTimer(plugin, () -> {
             if (countdownRemaining <= 0) {
@@ -47,7 +47,7 @@ public class SwapManager {
                 return;
             }
 
-            var msg = messages.message("countdown", "seconds", String.valueOf(countdownRemaining));
+            var msg = messages.get("countdown", "seconds", String.valueOf(countdownRemaining));
             var alive = aliveSupplier.get();
 
             for (Player player : alive) {
@@ -62,10 +62,10 @@ public class SwapManager {
     public void executeSwap(Set<Player> alivePlayers) {
         if (alivePlayers.size() < 2) return;
 
-        var cfg = plugin.getConfigManager();
-        var messages = cfg.getMessages();
-        var goSound = SoundUtil.minecraft(cfg.countdownGoSound());
-        var swapSound = SoundUtil.minecraft(cfg.swapSound());
+        var cfg = plugin.getMainConfig();
+        var messages = cfg.messages();
+        var goSound = SoundUtil.minecraft(cfg.sounds().countdownGo());
+        var swapSound = SoundUtil.minecraft(cfg.sounds().swap());
 
         var playerList = new ArrayList<>(alivePlayers);
         var loc1 = playerList.get(0).getLocation();

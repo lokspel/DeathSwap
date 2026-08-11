@@ -3,6 +3,7 @@ package dev.lokspel.deathswap.scoreboard;
 import dev.lokspel.deathswap.DeathSwap;
 import dev.lokspel.deathswap.util.PlayerUtil;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.scoreboard.Criteria;
@@ -53,7 +54,8 @@ public class MatchScoreboard {
             Player player = PlayerUtil.getOnlinePlayer(entry.getKey());
             if (player == null) continue;
 
-            String entryName = plugin.getConfigManager().getMessages().scoreboardEntry(player.getName());
+            String entryName = LegacyComponentSerializer.legacySection().serialize(
+                plugin.getMainConfig().messages().get("scoreboard-entry", "player", player.getName()));
             if (entryName.length() > 40) {
                 entryName = entryName.substring(0, 40);
             }

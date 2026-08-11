@@ -8,7 +8,7 @@ import dev.lokspel.deathswap.commands.SetLobbyCommand;
 import dev.lokspel.deathswap.commands.StartCommand;
 import dev.lokspel.deathswap.commands.StopCommand;
 import dev.lokspel.deathswap.commands.RegisteredCommand;
-import dev.lokspel.deathswap.config.ConfigManager;
+import dev.lokspel.deathswap.config.MainConfig;
 import dev.lokspel.deathswap.events.AsyncChatListener;
 import dev.lokspel.deathswap.events.EntityDamageListener;
 import dev.lokspel.deathswap.events.PlayerDeathListener;
@@ -25,7 +25,7 @@ import java.util.Objects;
 public class DeathSwap extends JavaPlugin {
 
     private static DeathSwap instance;
-    private ConfigManager configManager;
+    private MainConfig mainConfig;
     private WorldPool worldPool;
     private GameManager gameManager;
 
@@ -33,7 +33,7 @@ public class DeathSwap extends JavaPlugin {
     public void onEnable() {
         instance = this;
 
-        configManager = new ConfigManager(this);
+        mainConfig = new MainConfig(this);
 
         getServer().getPluginManager().registerEvents(new WorldInitListener(), this);
         worldPool = new WorldPool(this);
@@ -70,8 +70,8 @@ public class DeathSwap extends JavaPlugin {
         return instance;
     }
 
-    public ConfigManager getConfigManager() {
-        return configManager;
+    public MainConfig getMainConfig() {
+        return mainConfig;
     }
 
     public WorldPool getWorldPool() {

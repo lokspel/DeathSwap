@@ -26,7 +26,7 @@ public class WorldPool {
         this.plugin = plugin;
         this.reset = new WorldReset(plugin);
 
-        int count = Math.max(1, plugin.getConfigManager().worldCount());
+        int count = Math.max(1, plugin.getMainConfig().worlds().count());
         WorldLoader loader = new WorldLoader();
         for (int i = 0; i < count; i++) {
             instances.add(new WorldInstance("deathswap_" + i, loader));
@@ -71,7 +71,7 @@ public class WorldPool {
     }
 
     public void teleportToLobby(Player player) {
-        Location lobby = plugin.getConfigManager().getLobbyLocation();
+        Location lobby = plugin.getMainConfig().lobby().get();
         player.teleport(Objects.requireNonNullElseGet(lobby,
             () -> Bukkit.getWorlds().getFirst().getSpawnLocation()));
     }
@@ -127,7 +127,7 @@ public class WorldPool {
     }
 
     private void preGenerateSpawn(World world) {
-        int radius = plugin.getConfigManager().preGenerateRadius();
+        int radius = plugin.getMainConfig().worlds().preGenerateRadius();
         if (radius <= 0) return;
 
         Location spawn = world.getSpawnLocation();

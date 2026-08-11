@@ -1,8 +1,8 @@
 package dev.lokspel.deathswap.game;
 
 import dev.lokspel.deathswap.DeathSwap;
-import dev.lokspel.deathswap.config.ConfigManager;
-import dev.lokspel.deathswap.config.section.MessagesSection;
+import dev.lokspel.deathswap.config.MainConfig;
+import dev.lokspel.deathswap.config.MessagesConfig;
 import dev.lokspel.deathswap.scoreboard.MatchScoreboard;
 import dev.lokspel.deathswap.player.PlayerState;
 import dev.lokspel.deathswap.player.PlayerStateManager;
@@ -23,8 +23,8 @@ import java.util.UUID;
 public class MatchManager {
 
     private final DeathSwap plugin;
-    private final ConfigManager cfg;
-    private final MessagesSection messages;
+    private final MainConfig cfg;
+    private final MessagesConfig messages;
     private final World gameWorld;
     private final Set<UUID> playerUuids;
     private final Set<UUID> spectators;
@@ -37,8 +37,8 @@ public class MatchManager {
 
     public MatchManager(DeathSwap plugin, List<Player> players, Runnable onEnd) {
         this.plugin = plugin;
-        this.cfg = plugin.getConfigManager();
-        this.messages = cfg.getMessages();
+        this.cfg = plugin.getMainConfig();
+        this.messages = cfg.messages();
         this.onEnd = onEnd;
         this.playerUuids = new HashSet<>();
         this.spectators = new HashSet<>();
@@ -62,7 +62,7 @@ public class MatchManager {
         }
 
         deaths.init(playerUuids);
-        scoreboard.init(messages.message("scoreboard-title"));
+        scoreboard.init(messages.get("scoreboard-title"));
         refreshScoreboard();
 
         scheduleNextSwap();
@@ -73,7 +73,7 @@ public class MatchManager {
      * Handles a respawn of an in-match player. Returns the location to respawn
      * at (the game world spawn), or {@code null} if the player is not in the
      * match. The caller must apply it via {@code PlayerRespawnEvent#setRespawnLocation},
-     * as a direct teleport is overridden by the event afterwards.
+     * as a direct teleport is overridden by the event afterward.
      */
     public Location onPlayerRespawn(Player player) {
         if (!playerUuids.contains(player.getUniqueId())) return null;
@@ -95,7 +95,7 @@ public class MatchManager {
         if (!playerUuids.contains(player.getUniqueId())) return;
 
         int deathCount = deaths.add(player.getUniqueId());
-        int max = cfg.maxDeaths();
+        int max = cfg.game().maxDeaths();
 
         if (deathCount >= max) {
             spectators.add(player.getUniqueId());
@@ -177,7 +177,7 @@ public class MatchManager {
         if (alive.size() == 1) {
             Player winner = alive.iterator().next();
             broadcast(messages.prefixed("winner", "player", winner.getName()));
-            broadcastSound(cfg.winSound());
+            broadcastSound(cfg.sounds().win());
             winner.setGameMode(GameMode.SURVIVAL);
         }
 

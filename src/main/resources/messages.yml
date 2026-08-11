@@ -1,6 +1,9 @@
 # DeathSwap Messages
 # Format: MiniMessage
 
+# Prefix prepended to every message sent via prefixed()
+prefix: "<gold>[DeathSwap]</gold> "
+
 # Admin
 config-reloaded: "<green>Configuration reloaded successfully.</green>"
 lobby-set: "<green>Lobby location has been set.</green>"
@@ -39,4 +42,4 @@ not-running: "<red>No game is currently running.</red>"
 
 # Scoreboard
 scoreboard-title: "<gold>Death Count</gold>"
-scoreboard-entry: "<white>{player}</white>"
+scoreboard-entry: "<white><player></white>"

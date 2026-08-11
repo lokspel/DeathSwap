@@ -16,7 +16,7 @@ public class StartCommand implements SubCommand {
     public boolean execute(CommandSender sender, String[] args) {
         if (SubCommand.requirePermission(sender, "deathswap.start")) return true;
         if (!game.forceStart()) {
-            sender.sendMessage(DeathSwap.getInstance().getConfigManager().getMessages().prefixed("not-enough-players"));
+            sender.sendMessage(DeathSwap.getInstance().getMainConfig().messages().prefixed("not-enough-players"));
         }
         return true;
     }
