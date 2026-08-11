@@ -18,6 +18,7 @@ import dev.lokspel.deathswap.events.WorldInitListener;
 import dev.lokspel.deathswap.game.GameManager;
 import dev.lokspel.deathswap.world.WorldPool;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bstats.bukkit.Metrics;
 
 import java.util.List;
 import java.util.Objects;
@@ -28,12 +29,16 @@ public class DeathSwap extends JavaPlugin {
     private MainConfig mainConfig;
     private WorldPool worldPool;
     private GameManager gameManager;
+    private Metrics metrics;
 
     @Override
     public void onEnable() {
         instance = this;
 
         mainConfig = new MainConfig(this);
+
+        int pluginId = 33306;
+        metrics = new Metrics(this, pluginId);
 
         getServer().getPluginManager().registerEvents(new WorldInitListener(), this);
         worldPool = new WorldPool(this);
