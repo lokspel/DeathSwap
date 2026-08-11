@@ -5,11 +5,11 @@ import dev.lokspel.deathswap.config.ConfigManager;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-public class CommandSetLobby implements SubCommand {
+public class SetLobbyCommand implements SubCommand {
 
     private final ConfigManager config;
 
-    public CommandSetLobby(DeathSwap plugin) {
+    public SetLobbyCommand(DeathSwap plugin) {
         this.config = plugin.getConfigManager();
     }
 

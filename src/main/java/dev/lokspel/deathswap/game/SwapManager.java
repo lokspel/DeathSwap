@@ -23,9 +23,8 @@ public class SwapManager {
     }
 
     public void scheduleNext(Runnable onSwapComplete, Supplier<Set<Player>> aliveSupplier) {
-        long delay = Math.max(1,
-            (long) plugin.getConfigManager().swapInterval() - plugin.getConfigManager().countdownSeconds()
-        ) * 20L;
+        var cfg = plugin.getConfigManager();
+        long delay = Math.max(1, (long) cfg.swapInterval() - cfg.countdownSeconds()) * 20L;
 
         delayTask = Bukkit.getScheduler().runTaskLater(plugin, () -> {
             delayTask = null;
@@ -37,6 +36,8 @@ public class SwapManager {
     private void startCountdown(Runnable onSwapComplete, Supplier<Set<Player>> aliveSupplier) {
         var cfg = plugin.getConfigManager();
         countdownRemaining = cfg.countdownSeconds();
+        var messages = cfg.getMessages();
+        var tickSound = SoundUtil.minecraft(cfg.countdownTickSound());
 
         countdownTask = Bukkit.getScheduler().runTaskTimer(plugin, () -> {
             if (countdownRemaining <= 0) {
@@ -46,10 +47,10 @@ public class SwapManager {
                 return;
             }
 
-            var msg = cfg.getMessages().message("countdown", "seconds", String.valueOf(countdownRemaining));
-            var tickSound = SoundUtil.minecraft(cfg.countdownTickSound());
+            var msg = messages.message("countdown", "seconds", String.valueOf(countdownRemaining));
+            var alive = aliveSupplier.get();
 
-            for (Player player : aliveSupplier.get()) {
+            for (Player player : alive) {
                 PlayerUtil.showCountdownTitle(player, msg);
                 player.playSound(tickSound);
             }
@@ -62,11 +63,13 @@ public class SwapManager {
         if (alivePlayers.size() < 2) return;
 
         var cfg = plugin.getConfigManager();
+        var messages = cfg.getMessages();
+        var goSound = SoundUtil.minecraft(cfg.countdownGoSound());
+        var swapSound = SoundUtil.minecraft(cfg.swapSound());
+
         var playerList = new ArrayList<>(alivePlayers);
         var loc1 = playerList.get(0).getLocation();
         var loc2 = playerList.get(1).getLocation();
-        var goSound = SoundUtil.minecraft(cfg.countdownGoSound());
-        var swapSound = SoundUtil.minecraft(cfg.swapSound());
 
         for (Player player : playerList) {
             player.playSound(goSound);
@@ -77,7 +80,7 @@ public class SwapManager {
 
         for (Player player : playerList) {
             player.playSound(swapSound);
-            player.sendMessage(cfg.getMessages().prefixed("swap-message"));
+            player.sendMessage(messages.prefixed("swap-message"));
         }
     }
 

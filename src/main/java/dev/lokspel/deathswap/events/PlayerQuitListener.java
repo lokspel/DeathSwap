@@ -7,11 +7,11 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerQuitEvent;
 
-public class OnPlayerQuitEvent implements Listener {
+public class PlayerQuitListener implements Listener {
 
     private final GameManager game;
 
-    public OnPlayerQuitEvent(DeathSwap plugin) {
+    public PlayerQuitListener(DeathSwap plugin) {
         this.game = plugin.getGameManager();
     }
 

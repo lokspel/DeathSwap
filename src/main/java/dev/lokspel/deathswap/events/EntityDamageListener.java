@@ -9,12 +9,12 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 
-public class OnEntityDamageEvent implements Listener {
+public class EntityDamageListener implements Listener {
 
     private final GameManager game;
     private final ConfigManager config;
 
-    public OnEntityDamageEvent(DeathSwap plugin) {
+    public EntityDamageListener(DeathSwap plugin) {
         this.game = plugin.getGameManager();
         this.config = plugin.getConfigManager();
     }

@@ -9,27 +9,33 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 
-public class OnAsyncChatEvent implements Listener {
+public class AsyncChatListener implements Listener {
 
     private final GameManager game;
+    private final DeathSwap plugin;
 
-    public OnAsyncChatEvent(DeathSwap plugin) {
+    public AsyncChatListener(DeathSwap plugin) {
+        this.plugin = plugin;
         this.game = plugin.getGameManager();
     }
 
     @EventHandler(priority = EventPriority.HIGH)
     public void handle(AsyncChatEvent event) {
+        if (!plugin.getConfigManager().isolateChat()) {
+            return;
+        }
+
         Player sender = event.getPlayer();
         MatchManager match = game.findMatchByPlayer(sender.getUniqueId());
 
         if (match != null) {
-            event.viewers().clear();
-            for (Player p : match.getOnlinePlayers()) {
-                event.viewers().add(p);
-            }
-        } else {
-            event.viewers().removeIf(p ->
-                p instanceof Player player && game.findMatchByPlayer(player.getUniqueId()) != null);
+            event.viewers().retainAll(match.getOnlinePlayers());
+            return;
         }
+
+        event.viewers().removeIf(viewer ->
+                viewer instanceof Player player &&
+                        game.findMatchByPlayer(player.getUniqueId()) != null
+        );
     }
 }

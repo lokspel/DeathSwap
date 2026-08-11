@@ -4,6 +4,7 @@ import dev.lokspel.deathswap.DeathSwap;
 import dev.lokspel.deathswap.config.ConfigManager;
 import dev.lokspel.deathswap.config.section.MessagesSection;
 import dev.lokspel.deathswap.scoreboard.MatchScoreboard;
+import dev.lokspel.deathswap.player.PlayerStateManager;
 import dev.lokspel.deathswap.util.PlayerUtil;
 import dev.lokspel.deathswap.util.SoundUtil;
 import net.kyori.adventure.text.Component;
@@ -24,6 +25,7 @@ public class MatchManager {
     private final MessagesSection messages;
     private final World gameWorld;
     private final Set<UUID> playerUuids;
+    private final PlayerStateManager states;
     private final DeathManager deaths;
     private final SwapManager swap;
     private final MatchScoreboard scoreboard;
@@ -36,6 +38,7 @@ public class MatchManager {
         this.messages = cfg.getMessages();
         this.onEnd = onEnd;
         this.playerUuids = new HashSet<>();
+        this.states = new PlayerStateManager();
         this.deaths = new DeathManager();
         this.swap = new SwapManager(plugin);
         this.scoreboard = new MatchScoreboard(plugin);
@@ -50,6 +53,7 @@ public class MatchManager {
 
         for (Player player : players) {
             player.teleport(gameWorld.getSpawnLocation());
+            states.save(player);
             PlayerUtil.resetToSurvival(player);
         }
 
@@ -170,12 +174,13 @@ public class MatchManager {
 
         scoreboard.remove(playerUuids);
         for (Player player : getOnlinePlayers()) {
-            PlayerUtil.resetToSurvival(player);
+            states.restore(player);
             plugin.getWorldManager().teleportToLobby(player);
         }
 
         plugin.getWorldManager().deleteWorld(gameWorld);
         deaths.clear();
+        states.clear();
         playerUuids.clear();
         onEnd.run();
     }

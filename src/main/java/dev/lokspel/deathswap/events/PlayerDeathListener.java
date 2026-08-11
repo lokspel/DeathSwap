@@ -7,11 +7,11 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.PlayerDeathEvent;
 
-public class OnPlayerDeathEvent implements Listener {
+public class PlayerDeathListener implements Listener {
 
     private final GameManager game;
 
-    public OnPlayerDeathEvent(DeathSwap plugin) {
+    public PlayerDeathListener(DeathSwap plugin) {
         this.game = plugin.getGameManager();
     }
 

@@ -5,11 +5,11 @@ import dev.lokspel.deathswap.game.GameManager;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-public class CommandJoin implements SubCommand {
+public class LeaveCommand implements SubCommand {
 
     private final GameManager game;
 
-    public CommandJoin(DeathSwap plugin) {
+    public LeaveCommand(DeathSwap plugin) {
         this.game = plugin.getGameManager();
     }
 
@@ -17,7 +17,11 @@ public class CommandJoin implements SubCommand {
     public boolean execute(CommandSender sender, String[] args) {
         Player player = SubCommand.requirePlayer(sender);
         if (player == null) return true;
-        game.join(player);
+        if (!game.isParticipant(player)) {
+            sender.sendMessage(DeathSwap.getInstance().getConfigManager().getMessages().prefixed("not-joined"));
+            return true;
+        }
+        game.leave(player);
         return true;
     }
 }

@@ -4,11 +4,11 @@ import dev.lokspel.deathswap.DeathSwap;
 import dev.lokspel.deathswap.game.GameManager;
 import org.bukkit.command.CommandSender;
 
-public class CommandStop implements SubCommand {
+public class StopCommand implements SubCommand {
 
     private final GameManager game;
 
-    public CommandStop(DeathSwap plugin) {
+    public StopCommand(DeathSwap plugin) {
         this.game = plugin.getGameManager();
     }
 

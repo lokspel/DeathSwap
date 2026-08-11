@@ -21,6 +21,7 @@ public class ConfigManager {
     private int minPlayersFastStart;
     private int fastStartDelay;
     private boolean pvpEnabled;
+    private boolean isolateChat;
     private String countdownTickSound;
     private String countdownGoSound;
     private String swapSound;
@@ -50,6 +51,7 @@ public class ConfigManager {
         minPlayersFastStart = cfg.getInt("game.min-players-fast-start", 4);
         fastStartDelay = cfg.getInt("game.fast-start-delay", 3);
         pvpEnabled = cfg.getBoolean("game.pvp-enabled", true);
+        isolateChat = cfg.getBoolean("game.isolate-chat", true);
 
         countdownTickSound = cfg.getString("sounds.countdown-tick", "entity.note.pling");
         countdownGoSound = cfg.getString("sounds.countdown-go", "entity.experience_orb.pickup");
@@ -95,6 +97,7 @@ public class ConfigManager {
     public int minPlayersFastStart() { return minPlayersFastStart; }
     public int fastStartDelay() { return fastStartDelay; }
     public boolean pvpEnabled() { return pvpEnabled; }
+    public boolean isolateChat() { return isolateChat; }
     public String countdownTickSound() { return countdownTickSound; }
     public String countdownGoSound() { return countdownGoSound; }
     public String swapSound() { return swapSound; }

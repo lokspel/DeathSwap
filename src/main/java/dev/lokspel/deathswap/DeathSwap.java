@@ -1,19 +1,19 @@
 package dev.lokspel.deathswap;
 
 import dev.lokspel.deathswap.commands.CommandDispatcher;
-import dev.lokspel.deathswap.commands.CommandJoin;
-import dev.lokspel.deathswap.commands.CommandLeave;
-import dev.lokspel.deathswap.commands.CommandReload;
-import dev.lokspel.deathswap.commands.CommandSetLobby;
-import dev.lokspel.deathswap.commands.CommandStart;
-import dev.lokspel.deathswap.commands.CommandStop;
+import dev.lokspel.deathswap.commands.JoinCommand;
+import dev.lokspel.deathswap.commands.LeaveCommand;
+import dev.lokspel.deathswap.commands.ReloadCommand;
+import dev.lokspel.deathswap.commands.SetLobbyCommand;
+import dev.lokspel.deathswap.commands.StartCommand;
+import dev.lokspel.deathswap.commands.StopCommand;
 import dev.lokspel.deathswap.commands.RegisteredCommand;
 import dev.lokspel.deathswap.config.ConfigManager;
-import dev.lokspel.deathswap.events.OnAsyncChatEvent;
-import dev.lokspel.deathswap.events.OnEntityDamageEvent;
-import dev.lokspel.deathswap.events.OnPlayerDeathEvent;
-import dev.lokspel.deathswap.events.OnPlayerQuitEvent;
-import dev.lokspel.deathswap.events.OnPlayerRespawnEvent;
+import dev.lokspel.deathswap.events.AsyncChatListener;
+import dev.lokspel.deathswap.events.EntityDamageListener;
+import dev.lokspel.deathswap.events.PlayerDeathListener;
+import dev.lokspel.deathswap.events.PlayerQuitListener;
+import dev.lokspel.deathswap.events.PlayerRespawnListener;
 import dev.lokspel.deathswap.game.GameManager;
 import dev.lokspel.deathswap.world.WorldManager;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -37,20 +37,20 @@ public class DeathSwap extends JavaPlugin {
         gameManager = new GameManager(this);
 
         CommandDispatcher dispatcher = new CommandDispatcher(this, List.of(
-                new RegisteredCommand("start", new CommandStart(this)),
-                new RegisteredCommand("stop", new CommandStop(this)),
-                new RegisteredCommand("join", new CommandJoin(this)),
-                new RegisteredCommand("leave", new CommandLeave(this)),
-                new RegisteredCommand("reload", new CommandReload(this)),
-                new RegisteredCommand("setlobby", new CommandSetLobby(this))
+                new RegisteredCommand("start", new StartCommand(this)),
+                new RegisteredCommand("stop", new StopCommand(this)),
+                new RegisteredCommand("join", new JoinCommand(this)),
+                new RegisteredCommand("leave", new LeaveCommand(this)),
+                new RegisteredCommand("reload", new ReloadCommand(this)),
+                new RegisteredCommand("setlobby", new SetLobbyCommand(this))
         ));
         Objects.requireNonNull(getCommand("deathswap")).setExecutor(dispatcher);
 
-        getServer().getPluginManager().registerEvents(new OnPlayerDeathEvent(this), this);
-        getServer().getPluginManager().registerEvents(new OnPlayerQuitEvent(this), this);
-        getServer().getPluginManager().registerEvents(new OnAsyncChatEvent(this), this);
-        getServer().getPluginManager().registerEvents(new OnEntityDamageEvent(this), this);
-        getServer().getPluginManager().registerEvents(new OnPlayerRespawnEvent(this), this);
+        getServer().getPluginManager().registerEvents(new PlayerDeathListener(this), this);
+        getServer().getPluginManager().registerEvents(new PlayerQuitListener(this), this);
+        getServer().getPluginManager().registerEvents(new AsyncChatListener(this), this);
+        getServer().getPluginManager().registerEvents(new EntityDamageListener(this), this);
+        getServer().getPluginManager().registerEvents(new PlayerRespawnListener(this), this);
     }
 
     @Override

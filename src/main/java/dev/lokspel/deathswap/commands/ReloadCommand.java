@@ -4,11 +4,11 @@ import dev.lokspel.deathswap.DeathSwap;
 import dev.lokspel.deathswap.config.ConfigManager;
 import org.bukkit.command.CommandSender;
 
-public class CommandReload implements SubCommand {
+public class ReloadCommand implements SubCommand {
 
     private final ConfigManager config;
 
-    public CommandReload(DeathSwap plugin) {
+    public ReloadCommand(DeathSwap plugin) {
         this.config = plugin.getConfigManager();
     }
 

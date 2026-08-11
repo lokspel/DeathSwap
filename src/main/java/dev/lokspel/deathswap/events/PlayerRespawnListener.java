@@ -8,11 +8,11 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerRespawnEvent;
 
-public class OnPlayerRespawnEvent implements Listener {
+public class PlayerRespawnListener implements Listener {
 
     private final GameManager game;
 
-    public OnPlayerRespawnEvent(DeathSwap plugin) {
+    public PlayerRespawnListener(DeathSwap plugin) {
         this.game = plugin.getGameManager();
     }
 
