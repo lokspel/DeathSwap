@@ -1,6 +1,7 @@
 package dev.lokspel.deathswap.game;
 
 import dev.lokspel.deathswap.DeathSwap;
+import dev.lokspel.deathswap.api.event.PlayerSwapEvent;
 import dev.lokspel.deathswap.util.PlayerUtil;
 import dev.lokspel.deathswap.util.SoundUtil;
 import org.bukkit.Bukkit;
@@ -71,15 +72,22 @@ public class SwapManager {
         var swapSound = SoundUtil.minecraft(cfg.sounds().swap());
 
         var playerList = new ArrayList<>(alivePlayers);
-        var loc1 = playerList.get(0).getLocation();
-        var loc2 = playerList.get(1).getLocation();
+        var first = playerList.get(0);
+        var second = playerList.get(1);
+
+        var event = new PlayerSwapEvent(first, second);
+        Bukkit.getPluginManager().callEvent(event);
+        if (event.isCancelled()) return;
+
+        var loc1 = first.getLocation();
+        var loc2 = second.getLocation();
 
         for (Player player : playerList) {
             player.playSound(goSound);
         }
 
-        playerList.get(0).teleport(loc2);
-        playerList.get(1).teleport(loc1);
+        first.teleport(loc2);
+        second.teleport(loc1);
 
         for (Player player : playerList) {
             player.playSound(swapSound);

@@ -1,6 +1,8 @@
 package dev.lokspel.deathswap.game;
 
 import dev.lokspel.deathswap.DeathSwap;
+import dev.lokspel.deathswap.api.event.MatchStartEvent;
+import dev.lokspel.deathswap.api.event.MatchEndEvent;
 import dev.lokspel.deathswap.config.MainConfig;
 import dev.lokspel.deathswap.config.MessagesConfig;
 import dev.lokspel.deathswap.scoreboard.MatchScoreboard;
@@ -69,6 +71,8 @@ public class MatchManager {
 
         scheduleNextSwap();
         broadcast(messages.prefixed("game-started"));
+
+        Bukkit.getPluginManager().callEvent(new MatchStartEvent(players, gameWorld));
     }
 
     /**
@@ -177,22 +181,23 @@ public class MatchManager {
 
         cancelTasks();
 
+        Player winner = null;
         if (alive.size() == 1) {
-            Player winner = alive.iterator().next();
+            winner = alive.iterator().next();
             broadcast(messages.prefixed("winner", "player", winner.getName()));
             broadcastSound(cfg.sounds().win());
             winner.setGameMode(GameMode.SURVIVAL);
         }
 
-        cleanupNow();
+        cleanupNow(winner);
     }
 
     public void stop() {
         cancelTasks();
-        cleanupNow();
+        cleanupNow(null);
     }
 
-    private void cleanupNow() {
+    private void cleanupNow(Player winner) {
         if (cleanedUp) return;
         cleanedUp = true;
 
@@ -208,6 +213,8 @@ public class MatchManager {
         spectators.clear();
         playerUuids.clear();
         onEnd.run();
+
+        Bukkit.getPluginManager().callEvent(new MatchEndEvent(winner));
     }
 
     private void cancelTasks() {

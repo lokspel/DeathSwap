@@ -1,5 +1,6 @@
 package dev.lokspel.deathswap;
 
+import dev.lokspel.deathswap.api.DeathSwapAPI;
 import dev.lokspel.deathswap.commands.CommandDispatcher;
 import dev.lokspel.deathswap.commands.JoinCommand;
 import dev.lokspel.deathswap.commands.LeaveCommand;
@@ -59,6 +60,8 @@ public class DeathSwap extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new AsyncChatListener(this), this);
         getServer().getPluginManager().registerEvents(new EntityDamageListener(this), this);
         getServer().getPluginManager().registerEvents(new PlayerRespawnListener(this), this);
+
+        new DeathSwapAPI(this);
     }
 
     @Override
