@@ -30,7 +30,7 @@ game-started: "%prefix%<green>The DeathSwap game has started!</green>"
 already-running: "<red>A game is already running.</red>"
 
 # In-Game
-countdown: "<white>Swapping in</white> <gold><seconds></gold><white>s...</white>"
+countdown: "<gold><bold><seconds></bold></gold>"
 swap-message: "%prefix%<gray><italic>Swapping positions...</italic></gray>"
 eliminated: "%prefix%<red>You have been eliminated!</red>"
 player-eliminated: "%prefix%<white><player></white> <red>has been eliminated.</red>"
