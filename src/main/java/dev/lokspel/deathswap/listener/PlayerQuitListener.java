@@ -1,22 +1,22 @@
-package dev.lokspel.deathswap.events;
+package dev.lokspel.deathswap.listener;
 
 import dev.lokspel.deathswap.DeathSwap;
 import dev.lokspel.deathswap.game.GameManager;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.event.entity.PlayerDeathEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 
-public class PlayerDeathListener implements Listener {
+public class PlayerQuitListener implements Listener {
 
     private final GameManager game;
 
-    public PlayerDeathListener(DeathSwap plugin) {
+    public PlayerQuitListener(DeathSwap plugin) {
         this.game = plugin.getGameManager();
     }
 
     @EventHandler(priority = EventPriority.HIGH)
-    public void handle(PlayerDeathEvent event) {
-        game.onPlayerDeath(event.getPlayer());
+    public void handle(PlayerQuitEvent event) {
+        game.leave(event.getPlayer(), false);
     }
 }

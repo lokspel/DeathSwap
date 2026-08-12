@@ -1,4 +1,4 @@
-package dev.lokspel.deathswap.events;
+package dev.lokspel.deathswap.listener;
 
 import dev.lokspel.deathswap.DeathSwap;
 import dev.lokspel.deathswap.game.GameManager;

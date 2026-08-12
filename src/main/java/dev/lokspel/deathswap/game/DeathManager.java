@@ -34,6 +34,10 @@ public class DeathManager {
         return alive;
     }
 
+    public int get(UUID uuid) {
+        return counts.getOrDefault(uuid, 0);
+    }
+
     public Map<UUID, Integer> getAll() {
         return new HashMap<>(counts);
     }

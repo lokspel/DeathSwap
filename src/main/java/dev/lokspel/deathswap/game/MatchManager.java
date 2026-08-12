@@ -6,8 +6,8 @@ import dev.lokspel.deathswap.api.event.MatchEndEvent;
 import dev.lokspel.deathswap.config.MainConfig;
 import dev.lokspel.deathswap.config.MessagesConfig;
 import dev.lokspel.deathswap.scoreboard.MatchScoreboard;
-import dev.lokspel.deathswap.player.PlayerState;
-import dev.lokspel.deathswap.player.PlayerStateManager;
+import dev.lokspel.deathswap.game.player.PlayerState;
+import dev.lokspel.deathswap.game.player.PlayerStateManager;
 import dev.lokspel.deathswap.util.PlayerUtil;
 import dev.lokspel.deathswap.util.SoundUtil;
 import net.kyori.adventure.text.Component;
@@ -133,6 +133,14 @@ public class MatchManager {
 
     public boolean contains(UUID uuid) {
         return playerUuids.contains(uuid);
+    }
+
+    public boolean isSpectator(UUID uuid) {
+        return spectators.contains(uuid);
+    }
+
+    public int getDeaths(UUID uuid) {
+        return deaths.get(uuid);
     }
 
     public Set<Player> getOnlinePlayers() {

@@ -7,29 +7,61 @@
   <name>DeathSwap</name>
 
   <properties>
-    <java.version>25</java.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <java.version>25</java.version>
+
+    <!-- Runtime dependencies -->
+    <paper.version>26.2.build.112-stable</paper.version>
+    <placeholderapi.version>2.12.3</placeholderapi.version>
+    <bstats.version>3.2.1</bstats.version>
+
+    <!-- Build tooling -->
+    <lombok.version>1.18.42</lombok.version>
+    <compiler.version>3.15.0</compiler.version>
+    <shade.version>3.6.1</shade.version>
   </properties>
 
+  <!-- Repositories grouped by dependency -->
   <repositories>
     <repository>
       <id>papermc</id>
       <url>https://repo.papermc.io/repository/maven-public/</url>
     </repository>
+    <repository>
+      <id>placeholderapi</id>
+      <url>https://repo.helpch.at/releases/</url>
+    </repository>
   </repositories>
 
   <dependencies>
+    <!-- API (provided by server) -->
     <dependency>
       <groupId>io.papermc.paper</groupId>
       <artifactId>paper-api</artifactId>
-      <version>26.2.build.62-beta</version>
+      <version>${paper.version}</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
+      <groupId>me.clip</groupId>
+      <artifactId>placeholderapi</artifactId>
+      <version>${placeholderapi.version}</version>
+      <scope>provided</scope>
+    </dependency>
+
+    <!-- Compile-time only (shaded into the final jar) -->
+    <dependency>
       <groupId>org.bstats</groupId>
       <artifactId>bstats-bukkit</artifactId>
-      <version>3.2.1</version>
+      <version>${bstats.version}</version>
       <scope>compile</scope>
+    </dependency>
+
+    <!-- Annotation processing (compile-time only) -->
+    <dependency>
+      <groupId>org.projectlombok</groupId>
+      <artifactId>lombok</artifactId>
+      <version>${lombok.version}</version>
+      <scope>provided</scope>
     </dependency>
   </dependencies>
 
@@ -38,15 +70,22 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
-        <version>3.15.0</version>
+        <version>${compiler.version}</version>
         <configuration>
-          <release>25</release>
+          <release>${java.version}</release>
+          <annotationProcessorPaths>
+            <path>
+              <groupId>org.projectlombok</groupId>
+              <artifactId>lombok</artifactId>
+              <version>${lombok.version}</version>
+            </path>
+          </annotationProcessorPaths>
         </configuration>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-shade-plugin</artifactId>
-        <version>3.6.1</version>
+        <version>${shade.version}</version>
         <executions>
           <execution>
             <phase>package</phase>

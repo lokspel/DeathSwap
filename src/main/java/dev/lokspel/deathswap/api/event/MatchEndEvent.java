@@ -1,11 +1,13 @@
 package dev.lokspel.deathswap.api.event;
 
+import lombok.Getter;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+@Getter
 public class MatchEndEvent extends Event {
 
     private static final HandlerList HANDLERS = new HandlerList();
@@ -18,10 +20,6 @@ public class MatchEndEvent extends Event {
      */
     public MatchEndEvent(@Nullable Player winner) {
         this.winner = winner;
-    }
-
-    public Player getWinner() {
-        return winner;
     }
 
     public boolean hasWinner() {

@@ -22,10 +22,6 @@ final class WorldInstance {
         this.loader = loader;
     }
 
-    State state() {
-        return state;
-    }
-
     boolean isFree() {
         return state == State.FREE;
     }

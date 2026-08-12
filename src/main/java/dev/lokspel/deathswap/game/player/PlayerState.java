@@ -1,4 +1,4 @@
-package dev.lokspel.deathswap.player;
+package dev.lokspel.deathswap.game.player;
 
 import org.bukkit.GameMode;
 import org.bukkit.attribute.Attribute;

@@ -1,4 +1,4 @@
-package dev.lokspel.deathswap.commands;
+package dev.lokspel.deathswap.command;
 
 import dev.lokspel.deathswap.DeathSwap;
 import dev.lokspel.deathswap.config.MainConfig;
@@ -14,7 +14,7 @@ public class ReloadCommand implements SubCommand {
 
     @Override
     public boolean execute(CommandSender sender, String[] args) {
-        if (SubCommand.requirePermission(sender, "deathswap.reload")) return true;
+        if (SubCommand.requirePermission(sender, config.messages(), "deathswap.reload")) return true;
         config.load();
         sender.sendMessage(config.messages().prefixed("config-reloaded"));
         return true;

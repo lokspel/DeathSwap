@@ -1,4 +1,4 @@
-package dev.lokspel.deathswap.commands;
+package dev.lokspel.deathswap.command;
 
 import dev.lokspel.deathswap.DeathSwap;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;

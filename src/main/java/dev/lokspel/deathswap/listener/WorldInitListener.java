@@ -1,4 +1,4 @@
-package dev.lokspel.deathswap.events;
+package dev.lokspel.deathswap.listener;
 
 import org.bukkit.World;
 import org.bukkit.event.EventHandler;

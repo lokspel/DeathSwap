@@ -1,36 +1,40 @@
 package dev.lokspel.deathswap;
 
 import dev.lokspel.deathswap.api.DeathSwapAPI;
-import dev.lokspel.deathswap.commands.CommandDispatcher;
-import dev.lokspel.deathswap.commands.JoinCommand;
-import dev.lokspel.deathswap.commands.LeaveCommand;
-import dev.lokspel.deathswap.commands.ReloadCommand;
-import dev.lokspel.deathswap.commands.SetLobbyCommand;
-import dev.lokspel.deathswap.commands.StartCommand;
-import dev.lokspel.deathswap.commands.StopCommand;
-import dev.lokspel.deathswap.commands.RegisteredCommand;
+import dev.lokspel.deathswap.util.SoftDependUtil;
+import dev.lokspel.deathswap.util.placeholderapi.PlayerExpansion;
+import dev.lokspel.deathswap.command.CommandDispatcher;
+import dev.lokspel.deathswap.command.JoinCommand;
+import dev.lokspel.deathswap.command.LeaveCommand;
+import dev.lokspel.deathswap.command.ReloadCommand;
+import dev.lokspel.deathswap.command.SetLobbyCommand;
+import dev.lokspel.deathswap.command.StartCommand;
+import dev.lokspel.deathswap.command.StopCommand;
+import dev.lokspel.deathswap.command.RegisteredCommand;
 import dev.lokspel.deathswap.config.MainConfig;
-import dev.lokspel.deathswap.events.AsyncChatListener;
-import dev.lokspel.deathswap.events.EntityDamageListener;
-import dev.lokspel.deathswap.events.PlayerDeathListener;
-import dev.lokspel.deathswap.events.PlayerQuitListener;
-import dev.lokspel.deathswap.events.PlayerRespawnListener;
-import dev.lokspel.deathswap.events.WorldInitListener;
+import dev.lokspel.deathswap.listener.AsyncChatListener;
+import dev.lokspel.deathswap.listener.EntityDamageListener;
+import dev.lokspel.deathswap.listener.PlayerDeathListener;
+import dev.lokspel.deathswap.listener.PlayerQuitListener;
+import dev.lokspel.deathswap.listener.PlayerRespawnListener;
+import dev.lokspel.deathswap.listener.WorldInitListener;
 import dev.lokspel.deathswap.game.GameManager;
 import dev.lokspel.deathswap.world.WorldPool;
+import lombok.Getter;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bstats.bukkit.Metrics;
 
 import java.util.List;
 import java.util.Objects;
 
+@Getter
 public class DeathSwap extends JavaPlugin {
 
+    @Getter
     private static DeathSwap instance;
     private MainConfig mainConfig;
     private WorldPool worldPool;
     private GameManager gameManager;
-    private Metrics metrics;
 
     @Override
     public void onEnable() {
@@ -38,8 +42,7 @@ public class DeathSwap extends JavaPlugin {
 
         mainConfig = new MainConfig(this);
 
-        int pluginId = 33306;
-        metrics = new Metrics(this, pluginId);
+        new Metrics(this, 33306);
 
         getServer().getPluginManager().registerEvents(new WorldInitListener(), this);
         worldPool = new WorldPool(this);
@@ -62,6 +65,11 @@ public class DeathSwap extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new PlayerRespawnListener(this), this);
 
         new DeathSwapAPI(this);
+
+        if (SoftDependUtil.PLACEHOLDER_API_ENABLED) {
+            new PlayerExpansion(this, "deathswap").register();
+            new PlayerExpansion(this, "ds").register();
+        }
     }
 
     @Override
@@ -74,19 +82,4 @@ public class DeathSwap extends JavaPlugin {
         }
     }
 
-    public static DeathSwap getInstance() {
-        return instance;
-    }
-
-    public MainConfig getMainConfig() {
-        return mainConfig;
-    }
-
-    public WorldPool getWorldPool() {
-        return worldPool;
-    }
-
-    public GameManager getGameManager() {
-        return gameManager;
-    }
 }

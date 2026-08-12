@@ -108,6 +108,14 @@ public class GameManager {
         return findMatchByPlayer(player.getUniqueId()) != null || lobby.contains(player.getUniqueId());
     }
 
+    public boolean inLobby(UUID uuid) {
+        return lobby.contains(uuid);
+    }
+
+    public int lobbySize() {
+        return lobby.size();
+    }
+
     public boolean hasActivity() {
         return !matches.isEmpty() || lobby.size() > 0;
     }
