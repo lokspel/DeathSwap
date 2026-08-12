@@ -52,6 +52,20 @@ sounds:
 
 All messages in MiniMessage. Insert the prefix anywhere with `%prefix%`; placeholders like `<seconds>`, `<player>`, `<deaths>`, `<players>`, `<required>` are replaced at runtime.
 
+## Placeholders
+
+Requires [PlaceholderAPI](https://placeholderapi.com). The expansion registers under both `deathswap` and `ds`, so a placeholder can be written as `%deathswap_<name>%` or `%ds_<name>%`.
+
+| Placeholder | Description |
+|---|---|
+| `%deathswap_state%` | Player's game state: `none`, `lobby`, `match` or `spectator` |
+| `%deathswap_deaths%` | Current death count in the match (`0` if not in a match) |
+| `%deathswap_deaths_left%` | Deaths remaining before elimination |
+| `%deathswap_max_deaths%` | `max-deaths` configured limit |
+| `%deathswap_lobby_players%` | Players currently waiting in the lobby |
+| `%deathswap_lobby_required%` | `min-players-to-start` needed to start |
+| `%deathswap_swap_interval%` | `swap-interval` configured seconds between swaps |
+
 ## Building
 
 Requires Java 25 and Maven.
