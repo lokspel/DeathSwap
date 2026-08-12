@@ -55,6 +55,12 @@ public class WorldPool {
     /**
      * Releases a world back into the pool, resets its chunks asynchronously and
      * reloads it, so it is ready for the next match.
+     *
+     * <p>The unload/reset is deferred by one tick so that any player teleport
+     * out of this world scheduled on the current tick (e.g. teleporting back to
+     * the lobby when the match ends) is fully applied before the world is torn
+     * down. Unloading a world a player still occupies within the same tick
+     * strands them in the void until they rejoin.
      */
     public void deleteWorld(World world) {
         if (world == null) return;
@@ -62,19 +68,34 @@ public class WorldPool {
         for (WorldInstance instance : instances) {
             if (!instance.owns(world)) continue;
 
-            for (Player player : world.getPlayers()) {
-                teleportToLobby(player);
-            }
-
-            reset.reset(instance, () -> loadInstance(instance));
+            Bukkit.getGlobalRegionScheduler().run(plugin, task -> {
+                for (Player player : world.getPlayers()) {
+                    teleportToLobby(player);
+                }
+                reset.reset(instance, () -> loadInstance(instance));
+            });
             return;
         }
     }
 
     public void teleportToLobby(Player player) {
+        player.teleport(lobbyLocation());
+    }
+
+    public Location lobbyLocation() {
         Location lobby = plugin.getMainConfig().lobby().get();
-        player.teleport(Objects.requireNonNullElseGet(lobby,
-            () -> Bukkit.getWorlds().getFirst().getSpawnLocation()));
+        return Objects.requireNonNullElseGet(lobby,
+            () -> Bukkit.getWorlds().getFirst().getSpawnLocation());
+    }
+
+    /**
+     * Whether the given world is one of the plugin's pooled game worlds.
+     */
+    public boolean isGameWorld(World world) {
+        for (WorldInstance instance : instances) {
+            if (instance.owns(world)) return true;
+        }
+        return false;
     }
 
     /**

@@ -11,9 +11,11 @@ import org.bukkit.event.player.PlayerRespawnEvent;
 
 public class PlayerRespawnListener implements Listener {
 
+    private final DeathSwap plugin;
     private final GameManager game;
 
     public PlayerRespawnListener(DeathSwap plugin) {
+        this.plugin = plugin;
         this.game = plugin.getGameManager();
     }
 
@@ -25,6 +27,14 @@ public class PlayerRespawnListener implements Listener {
             if (location != null) {
                 event.setRespawnLocation(location);
             }
+            return;
+        }
+
+        // The player died in a game world but the match has already ended and
+        // its world is being torn down (e.g. eliminated in the final seconds).
+        // Respawn them in the lobby instead of into the deleted world's void.
+        if (plugin.getWorldPool().isGameWorld(event.getPlayer().getWorld())) {
+            event.setRespawnLocation(plugin.getWorldPool().lobbyLocation());
         }
     }
 }
