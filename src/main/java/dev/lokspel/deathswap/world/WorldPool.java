@@ -70,6 +70,18 @@ public class WorldPool {
         for (WorldInstance instance : instances) {
             if (!instance.owns(world)) continue;
 
+            // During shutdown the plugin is disabled and can't register scheduler
+            // tasks, so fall back to the synchronous unload/clear path.
+            if (!plugin.isEnabled()) {
+                for (World w : instance.allWorlds()) {
+                    for (Player player : w.getPlayers()) {
+                        teleportToLobby(player);
+                    }
+                }
+                reset.clearNow(instance);
+                return;
+            }
+
             Bukkit.getGlobalRegionScheduler().run(plugin, task -> {
                 for (World w : instance.allWorlds()) {
                     for (Player player : w.getPlayers()) {

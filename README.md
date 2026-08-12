@@ -7,9 +7,12 @@ Last-player-standing minigame for Paper. Join a lobby, teleport to a fresh world
 - Auto-start lobby with configurable player minimums
 - Timed position swaps with warning countdown
 - Death tracking with configurable lives; last one standing wins
+- Optional match time limit with winner-by-fewest-deaths (and tie messaging)
 - Toggleable sidebar scoreboard and HUD countdowns
 - Scoped match chat, PvP toggle, configurable sounds
 - Fresh temporary world per match, deleted on game end
+- Optional per-match nether and end dimensions (own portals per game)
+- Configurable per-world random respawn radius around spawn
 
 ## Commands
 
@@ -35,6 +38,7 @@ game:
   swap-interval: 300
   countdown-seconds: 5
   max-deaths: 5
+  max-match-time: 0         # Max match length in minutes, 0 = unlimited
   pvp-enabled: false
 
   # Display Options
@@ -46,7 +50,16 @@ sounds:
   countdown-go: entity.experience_orb.pickup
   swap: entity.enderman.teleport
   win: ui.toast.challenge_complete
+
+worlds:
+  count: 5                # Number of reusable worlds (each = one concurrent match)
+  pre-generate-radius: 7  # Pre-generate spawn chunks around the spawn, 0 = off
+  spawn-radius: 100       # Per-world random respawn radius around spawn, 0 = exact spawn
+  name-prefix: ds         # Prefix for generated world names (e.g. "ds_0")
+  generate-dimensions: true   # Give every game world its own nether and end
 ```
+
+> When `max-match-time` is reached, the alive player with the fewest deaths wins; if tied, the `time-up` message lists the players.
 
 ### `messages.yml`
 
@@ -75,7 +88,7 @@ Requires Java 25 and Maven.
 mvn clean package
 ```
 
-The output jar is `target/DeathSwap-1.0.0.jar`.
+The output jar is `target/DeathSwap-1.0.1.jar`.
 
 ## Requirements
 
