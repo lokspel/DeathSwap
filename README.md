@@ -65,6 +65,7 @@ Requires [PlaceholderAPI](https://placeholderapi.com). The expansion registers u
 | `%deathswap_players_in_lobby%` | Players currently waiting in the lobby |
 | `%deathswap_min_players%` | `min-players-to-start` required to start |
 | `%deathswap_swap_interval%` | `swap-interval` configured seconds between swaps |
+| `%deathswap_next_swap%` | Live countdown (seconds) until the next swap (`0` = swapping now; full interval outside a match) |
 
 ## Building
 

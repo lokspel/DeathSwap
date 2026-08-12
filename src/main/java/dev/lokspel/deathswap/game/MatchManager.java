@@ -143,6 +143,10 @@ public class MatchManager {
         return deaths.get(uuid);
     }
 
+    public int getSecondsUntilSwap() {
+        return swap.secondsUntilSwap();
+    }
+
     public Set<Player> getOnlinePlayers() {
         return PlayerUtil.getOnlinePlayers(playerUuids);
     }

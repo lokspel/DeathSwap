@@ -27,9 +27,10 @@ public class WorldPool {
         this.reset = new WorldReset(plugin);
 
         int count = Math.max(1, plugin.getMainConfig().worlds().count());
+        String prefix = plugin.getMainConfig().worlds().namePrefix();
         WorldLoader loader = new WorldLoader();
         for (int i = 0; i < count; i++) {
-            instances.add(new WorldInstance("deathswap_" + i, loader));
+            instances.add(new WorldInstance(prefix + "_" + i, loader));
         }
         warmUp();
     }

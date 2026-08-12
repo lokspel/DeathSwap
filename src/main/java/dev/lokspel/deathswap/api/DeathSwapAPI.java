@@ -61,4 +61,13 @@ public class DeathSwapAPI {
     public boolean isInLobby(Player player) {
         return plugin.getGameManager().inLobby(player.getUniqueId());
     }
+
+    /**
+     * Seconds remaining until the next position swap for the player's match,
+     * or the configured swap interval if the player is not in a match.
+     */
+    public int getSecondsUntilNextSwap(Player player) {
+        MatchManager match = getMatch(player);
+        return match == null ? plugin.getMainConfig().game().swapInterval() : match.getSecondsUntilSwap();
+    }
 }

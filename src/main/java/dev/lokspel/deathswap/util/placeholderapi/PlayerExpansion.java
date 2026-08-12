@@ -54,6 +54,7 @@ public class PlayerExpansion extends PlaceholderExpansion {
             case "players_in_lobby" -> String.valueOf(plugin.getGameManager().lobbySize());
             case "min_players" -> String.valueOf(cfg.game().minPlayersToStart());
             case "swap_interval" -> String.valueOf(cfg.game().swapInterval());
+            case "next_swap" -> String.valueOf(api.getSecondsUntilNextSwap(player));
             default -> null;
         };
     }

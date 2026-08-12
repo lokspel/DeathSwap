@@ -24,4 +24,8 @@ public class WorldsSection {
     public int preGenerateRadius() {
         return config().getInt(PATH + "pre-generate-radius", 8);
     }
+
+    public String namePrefix() {
+        return config().getString(PATH + "name-prefix", "deathswap");
+    }
 }

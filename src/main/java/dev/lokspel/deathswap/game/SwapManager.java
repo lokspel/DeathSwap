@@ -18,6 +18,8 @@ public class SwapManager {
     private BukkitTask delayTask;
     private BukkitTask countdownTask;
     private int countdownRemaining;
+    private int delayRemaining;
+    private boolean inDelay;
 
     public SwapManager(DeathSwap plugin) {
         this.plugin = plugin;
@@ -25,13 +27,34 @@ public class SwapManager {
 
     public void scheduleNext(Runnable onSwapComplete, Supplier<Set<Player>> aliveSupplier) {
         var cfg = plugin.getMainConfig();
-        long delay = Math.max(1, (long) cfg.game().swapInterval() - cfg.game().countdownSeconds()) * 20L;
+        long delay = Math.max(1, (long) cfg.game().swapInterval() - cfg.game().countdownSeconds());
 
-        delayTask = Bukkit.getScheduler().runTaskLater(plugin, () -> {
+        inDelay = true;
+        delayRemaining = (int) delay;
+
+        delayTask = Bukkit.getScheduler().runTaskTimer(plugin, () -> {
+            if (--delayRemaining > 0) return;
+
+            delayTask.cancel();
             delayTask = null;
+            inDelay = false;
             if (aliveSupplier.get().size() < 2) return;
             startCountdown(onSwapComplete, aliveSupplier);
-        }, delay);
+        }, 1L, 20L);
+    }
+
+    /**
+     * Seconds remaining until the next swap, or the full configured interval
+     * when no swap is pending. 0 means a swap is happening right now.
+     */
+    public int secondsUntilSwap() {
+        if (inDelay) {
+            return delayRemaining;
+        }
+        if (countdownTask != null) {
+            return countdownRemaining;
+        }
+        return plugin.getMainConfig().game().swapInterval();
     }
 
     private void startCountdown(Runnable onSwapComplete, Supplier<Set<Player>> aliveSupplier) {
