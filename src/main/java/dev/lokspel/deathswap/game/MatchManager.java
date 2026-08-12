@@ -26,7 +26,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
-import java.util.stream.Collectors;
 
 public class MatchManager {
 
@@ -44,7 +43,7 @@ public class MatchManager {
     private BukkitTask timeoutTask;
     private boolean cleanedUp;
 
-    public MatchManager(DeathSwap plugin, List<Player> players, Runnable onEnd) {
+    public MatchManager(DeathSwap plugin, List<Player> players, World gameWorld, Runnable onEnd) {
         this.plugin = plugin;
         this.cfg = plugin.getMainConfig();
         this.messages = cfg.messages();
@@ -62,7 +61,7 @@ public class MatchManager {
             player.sendMessage(messages.prefixed("world-preparing"));
         }
 
-        gameWorld = plugin.getWorldPool().createGameWorld();
+        this.gameWorld = gameWorld;
 
         for (Player player : players) {
             player.teleport(gameWorld.getSpawnLocation());
@@ -251,10 +250,7 @@ public class MatchManager {
             broadcastSound(cfg.sounds().win());
             winner.setGameMode(GameMode.SURVIVAL);
         } else {
-            String names = leaders.stream()
-                    .map(Player::getName)
-                    .collect(Collectors.joining(", "));
-            broadcast(messages.prefixed("time-up", "players", names));
+            broadcast(messages.prefixed("time-up"));
         }
 
         cleanupNow(winner);

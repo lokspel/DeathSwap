@@ -9,6 +9,7 @@ import org.bukkit.WorldBorder;
 import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.ThreadLocalRandom;
@@ -51,10 +52,6 @@ public class WorldPool {
         return instance.getWorld();
     }
 
-    public boolean hasFreeInstance() {
-        return findFreeInstance() != null;
-    }
-
     /**
      * Releases a world back into the pool, resets its chunks asynchronously and
      * reloads it, so it is ready for the next match.
@@ -66,23 +63,32 @@ public class WorldPool {
      * strands them in the void until they rejoin.
      */
     public void deleteWorld(World world) {
-        if (world == null) return;
+        if (world == null) {
+            return;
+        }
 
         for (WorldInstance instance : instances) {
-            if (!instance.owns(world)) continue;
+            if (!instance.owns(world)) {
+                continue;
+            }
 
-            // During shutdown the plugin is disabled and can't register scheduler
-            // tasks, so fall back to the synchronous unload/clear path.
             if (!plugin.isEnabled()) {
                 evacuate(instance);
                 reset.clearNow(instance);
                 return;
             }
 
-            Bukkit.getGlobalRegionScheduler().run(plugin, task -> {
+            Bukkit.getGlobalRegionScheduler().run(plugin, _ -> {
                 evacuate(instance);
-                reset.reset(instance, () -> loadInstance(instance));
+
+                // Give teleports one tick to complete before unloading the world.
+                Bukkit.getGlobalRegionScheduler().runDelayed(
+                        plugin,
+                        _ -> reset.reset(instance, () -> loadInstance(instance)),
+                        1L
+                );
             });
+
             return;
         }
     }
@@ -129,13 +135,6 @@ public class WorldPool {
         }
     }
 
-    private WorldInstance findFreeInstance() {
-        for (WorldInstance instance : instances) {
-            if (instance.isFree()) return instance;
-        }
-        return null;
-    }
-
     /**
      * Finds a free instance whose world is already loaded and spawn
      * pre-generated, so no world is ever created or generated on the server
@@ -144,7 +143,9 @@ public class WorldPool {
     private WorldInstance findReadyInstance() {
         List<WorldInstance> ready = new ArrayList<>();
         for (WorldInstance instance : instances) {
-            if (instance.isFree() && instance.isLoaded()) ready.add(instance);
+            if (instance.isFree() && instance.isLoaded() && instance.isSpawnReady()) {
+                ready.add(instance);
+            }
         }
         if (ready.isEmpty()) return null;
         return ready.get(ThreadLocalRandom.current().nextInt(ready.size()));
@@ -158,7 +159,7 @@ public class WorldPool {
         instance.load();
         applySpawnRule(instance);
         applyBorder(instance);
-        preGenerateSpawn(instance.getWorld());
+        preGenerateSpawn(instance);
     }
 
     /**
@@ -193,29 +194,59 @@ public class WorldPool {
     }
 
     /**
-     * Creates all reusable worlds on the main thread at startup. Modern Paper
-     * does not pre-generate a large spawn area synchronously, so this is cheap.
+     * Loads all reusable worlds on the main thread, but staggered one per tick
+     * instead of all at once, so the server doesn't spike CPU during startup.
+     * Worlds ready before the first match, since the lobby has a long countdown.
      */
     private void warmUp() {
-        for (WorldInstance instance : instances) {
-            loadInstance(instance);
-        }
+        Iterator<WorldInstance> iterator = instances.iterator();
+        Bukkit.getScheduler().runTaskTimer(plugin, task -> {
+            if (iterator.hasNext()) {
+                loadInstance(iterator.next());
+            } else {
+                task.cancel();
+            }
+        }, 1L, 1L);
     }
 
-    private void preGenerateSpawn(World world) {
+    private void preGenerateSpawn(WorldInstance instance) {
+        World world = instance.getWorld();
+
         int radius = plugin.getMainConfig().worlds().preGenerateRadius();
-        if (radius <= 0) return;
 
         Location spawn = world.getSpawnLocation();
+
         int centerX = spawn.getBlockX() >> 4;
         int centerZ = spawn.getBlockZ() >> 4;
 
-        Bukkit.getAsyncScheduler().runNow(plugin, _ -> {
-            for (int x = centerX - radius; x <= centerX + radius; x++) {
-                for (int z = centerZ - radius; z <= centerZ + radius; z++) {
-                    world.getChunkAtAsync(x, z).join();
-                }
-            }
-        });
+        if (radius <= 0) {
+            instance.markSpawnReady();
+            return;
+        }
+
+        int minX = centerX - radius;
+        int minZ = centerZ - radius;
+        int maxX = centerX + radius;
+        int maxZ = centerZ + radius;
+
+        world.getChunksAtAsync(
+                minX,
+                minZ,
+                maxX,
+                maxZ,
+                true,
+                () -> Bukkit.getGlobalRegionScheduler().run(plugin, _ -> {
+                    int x = world.getSpawnLocation().getBlockX();
+                    int z = world.getSpawnLocation().getBlockZ();
+
+                    world.setSpawnLocation(
+                            x,
+                            world.getHighestBlockYAt(x, z) + 1,
+                            z
+                    );
+
+                    instance.markSpawnReady();
+                })
+        );
     }
 }

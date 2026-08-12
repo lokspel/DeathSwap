@@ -1,5 +1,6 @@
 package dev.lokspel.deathswap.world;
 
+import io.papermc.paper.math.Position;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.WorldCreator;
@@ -14,10 +15,18 @@ import org.bukkit.WorldCreator;
  * companion worlds using the standard Minecraft naming convention, so portals
  * built in a match link to that match's dimensions instead of the server's
  * shared ones.
+ *
+ * <p>A forced spawn position is set so world creation does not synchronously
+ * scan/generate spawn chunks (which would stall the server thread for many
+ * seconds per world). The exact position is corrected afterwards in
+ * {@link WorldPool#loadInstance}.
  */
 final class WorldLoader {
 
     World load(String name, World.Environment environment) {
-        return Bukkit.createWorld(new WorldCreator(name).environment(environment));
+        WorldCreator creator = new WorldCreator(name)
+                .environment(environment)
+                .forcedSpawnPosition(Position.block(0, 64, 0), 0f, 0f);
+        return Bukkit.createWorld(creator);
     }
 }

@@ -1,6 +1,8 @@
 package dev.lokspel.deathswap.game;
 
 import dev.lokspel.deathswap.DeathSwap;
+import org.bukkit.Bukkit;
+import org.bukkit.World;
 import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
@@ -15,6 +17,7 @@ public class GameManager {
     private final DeathSwap plugin;
     private final LobbyManager lobby;
     private final Map<UUID, MatchManager> matches = new HashMap<>();
+    private boolean busyNotified;
 
     public GameManager(DeathSwap plugin) {
         this.plugin = plugin;
@@ -75,18 +78,27 @@ public class GameManager {
         Set<Player> players = lobby.getOnlinePlayers();
         if (players.size() < 2) return;
 
-        if (!plugin.getWorldPool().hasFreeInstance()) {
-            var msg = plugin.getMainConfig().messages().prefixed("worlds-busy");
-            for (Player player : players) {
-                player.sendMessage(msg);
+        // Acquire a fully spawn-ready world up front (free + loaded + spawn
+        // area generated). If none is ready yet, keep players in the lobby,
+        // notify once and retry silently until a world becomes available.
+        World world = plugin.getWorldPool().createGameWorld();
+        if (world == null) {
+            if (!busyNotified) {
+                var msg = plugin.getMainConfig().messages().prefixed("worlds-busy");
+                for (Player player : players) {
+                    player.sendMessage(msg);
+                }
+                busyNotified = true;
             }
+            Bukkit.getScheduler().runTaskLater(plugin, this::createMatch, 20L);
             return;
         }
+        busyNotified = false;
 
         lobby.clear();
 
         UUID matchId = UUID.randomUUID();
-        matches.put(matchId, new MatchManager(plugin, new ArrayList<>(players), () -> matches.remove(matchId)));
+        matches.put(matchId, new MatchManager(plugin, new ArrayList<>(players), world, () -> matches.remove(matchId)));
     }
 
     public void stop() {

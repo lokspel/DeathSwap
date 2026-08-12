@@ -16,6 +16,7 @@ final class WorldInstance {
     private final WorldLoader loader;
     private final boolean generateDimensions;
     private State state = State.FREE;
+    private boolean spawnReady;
     private World world;
     private World nether;
     private World end;
@@ -37,6 +38,19 @@ final class WorldInstance {
     boolean isLoaded() {
         return world != null
             && (!generateDimensions || (nether != null && end != null));
+    }
+
+    /**
+     * Whether the spawn area has been generated and the spawn point corrected
+     * onto the surface. A world is only handed out to a match once this is
+     * true, so players never spawn into a void.
+     */
+    boolean isSpawnReady() {
+        return spawnReady;
+    }
+
+    void markSpawnReady() {
+        spawnReady = true;
     }
 
     boolean owns(World world) {
@@ -69,6 +83,7 @@ final class WorldInstance {
 
     void markResetting() {
         state = State.RESETTING;
+        spawnReady = false;
         world = null;
         nether = null;
         end = null;
