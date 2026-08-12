@@ -17,6 +17,6 @@ public class PlayerQuitListener implements Listener {
 
     @EventHandler(priority = EventPriority.HIGH)
     public void handle(PlayerQuitEvent event) {
-        game.leave(event.getPlayer(), false);
+        game.leave(event.getPlayer(), true);
     }
 }

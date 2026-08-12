@@ -9,7 +9,6 @@ import org.bukkit.WorldBorder;
 import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.ThreadLocalRandom;
@@ -32,10 +31,17 @@ public class WorldPool {
         int count = Math.max(1, plugin.getMainConfig().worlds().count());
         String prefix = plugin.getMainConfig().worlds().namePrefix();
         boolean dimensions = plugin.getMainConfig().worlds().generateDimensions();
+
         WorldLoader loader = new WorldLoader();
+
         for (int i = 0; i < count; i++) {
-            instances.add(new WorldInstance(prefix + "_" + i, loader, dimensions));
+            instances.add(new WorldInstance(
+                    prefix + "_" + i,
+                    loader,
+                    dimensions
+            ));
         }
+
         warmUp();
     }
 
@@ -46,21 +52,21 @@ public class WorldPool {
      */
     public World createGameWorld() {
         WorldInstance instance = findReadyInstance();
-        if (instance == null) return null;
+
+        if (instance == null) {
+            return null;
+        }
 
         instance.acquire();
         return instance.getWorld();
     }
 
     /**
-     * Releases a world back into the pool, resets its chunks asynchronously and
-     * reloads it, so it is ready for the next match.
+     * Releases a world back into the pool.
      *
-     * <p>The unload/reset is deferred by one tick so that any player teleport
-     * out of this world scheduled on the current tick (e.g. teleporting back to
-     * the lobby when the match ends) is fully applied before the world is torn
-     * down. Unloading a world a player still occupies within the same tick
-     * strands them in the void until they rejoin.
+     * <p>The players are first evacuated to the lobby. The actual world reset
+     * is delayed by one tick to ensure that the teleport is completed before
+     * the world is unloaded.
      */
     public void deleteWorld(World world) {
         if (world == null) {
@@ -81,10 +87,12 @@ public class WorldPool {
             Bukkit.getGlobalRegionScheduler().run(plugin, _ -> {
                 evacuate(instance);
 
-                // Give teleports one tick to complete before unloading the world.
                 Bukkit.getGlobalRegionScheduler().runDelayed(
                         plugin,
-                        _ -> reset.reset(instance, () -> loadInstance(instance)),
+                        _ -> reset.reset(
+                                instance,
+                                () -> loadInstance(instance)
+                        ),
                         1L
                 );
             });
@@ -94,13 +102,19 @@ public class WorldPool {
     }
 
     /**
-     * Teleports any player still in any of the instance's worlds back to the
-     * lobby, so a world is never torn down while a player occupies it.
+     * Teleports any player still inside the instance's worlds back to the
+     * lobby before the worlds are unloaded.
      */
     private void evacuate(WorldInstance instance) {
+        Location lobby = lobbyLocation();
+
         for (World world : instance.allWorlds()) {
+            if (world == null) {
+                continue;
+            }
+
             for (Player player : world.getPlayers()) {
-                teleportToLobby(player);
+                player.teleport(lobby);
             }
         }
     }
@@ -111,23 +125,28 @@ public class WorldPool {
 
     public Location lobbyLocation() {
         Location lobby = plugin.getMainConfig().lobby().get();
-        return Objects.requireNonNullElseGet(lobby,
-            () -> Bukkit.getWorlds().getFirst().getSpawnLocation());
+
+        return Objects.requireNonNullElseGet(
+                lobby,
+                () -> Bukkit.getWorlds().getFirst().getSpawnLocation()
+        );
     }
 
     /**
-     * Whether the given world is one of the plugin's pooled game worlds.
+     * Whether the given world belongs to this world pool.
      */
     public boolean isGameWorld(World world) {
         for (WorldInstance instance : instances) {
-            if (instance.owns(world)) return true;
+            if (instance.owns(world)) {
+                return true;
+            }
         }
+
         return false;
     }
 
     /**
-     * Clears all pooled worlds synchronously on shutdown, so the next server
-     * start is fresh (no leftover builds from the previous session).
+     * Clears all pooled worlds synchronously during shutdown.
      */
     public void shutdown() {
         for (WorldInstance instance : instances) {
@@ -136,83 +155,152 @@ public class WorldPool {
     }
 
     /**
-     * Finds a free instance whose world is already loaded and spawn
-     * pre-generated, so no world is ever created or generated on the server
-     * thread.
+     * Finds a free instance whose worlds are loaded and whose spawn area has
+     * finished generating.
      */
     private WorldInstance findReadyInstance() {
         List<WorldInstance> ready = new ArrayList<>();
+
         for (WorldInstance instance : instances) {
-            if (instance.isFree() && instance.isLoaded() && instance.isSpawnReady()) {
+            if (instance.isFree()
+                    && instance.isLoaded()
+                    && instance.isSpawnReady()) {
+
                 ready.add(instance);
             }
         }
-        if (ready.isEmpty()) return null;
-        return ready.get(ThreadLocalRandom.current().nextInt(ready.size()));
+
+        if (ready.isEmpty()) {
+            return null;
+        }
+
+        return ready.get(
+                ThreadLocalRandom.current().nextInt(ready.size())
+        );
     }
 
     /**
-     * Loads (or reloads) a world and kicks off asynchronous spawn
-     * pre-generation.
+     * Loads a world and starts asynchronous chunk pre-generation.
+     *
+     * @param instance world instance to load
+     * @param onReady  called after the spawn area has finished generating
      */
-    private void loadInstance(WorldInstance instance) {
+    private void loadInstance(WorldInstance instance, Runnable onReady) {
         instance.load();
+
         applySpawnRule(instance);
         applyBorder(instance);
-        preGenerateSpawn(instance);
+
+        preGenerateSpawn(instance, onReady);
     }
 
     /**
-     * Applies the configured world border size (in blocks) to every world of
-     * the instance, centred on that world's spawn. {@code 0} resets it to the
-     * server default.
+     * Loads a world and starts its pre-generation.
+     */
+    private void loadInstance(WorldInstance instance) {
+        loadInstance(instance, () -> {
+        });
+    }
+
+    /**
+     * Applies the configured world border size to every world of the instance.
      */
     private void applyBorder(WorldInstance instance) {
         int size = plugin.getMainConfig().worlds().border();
+
         for (World world : instance.allWorlds()) {
+            if (world == null) {
+                continue;
+            }
+
             WorldBorder border = world.getWorldBorder();
+
             if (size <= 0) {
                 border.reset();
                 continue;
             }
+
             Location spawn = world.getSpawnLocation();
-            border.setCenter(spawn.getX(), spawn.getZ());
+
+            border.setCenter(
+                    spawn.getX(),
+                    spawn.getZ()
+            );
+
             border.setSize(size);
         }
     }
 
     /**
-     * Applies the configurable spawn-radius as the per-world
-     * {@code respawn_radius} gamerule. It is read back by the match when
-     * computing a random respawn point, keeping the radius per world.
+     * Applies the configured respawn radius gamerule to every world.
      */
     private void applySpawnRule(WorldInstance instance) {
-        int radius = Math.max(0, plugin.getMainConfig().worlds().spawnRadius());
+        int radius = Math.max(
+                0,
+                plugin.getMainConfig().worlds().spawnRadius()
+        );
+
         for (World world : instance.allWorlds()) {
-            world.setGameRule(GameRules.RESPAWN_RADIUS, radius);
+            if (world == null) {
+                continue;
+            }
+
+            world.setGameRule(
+                    GameRules.RESPAWN_RADIUS,
+                    radius
+            );
         }
     }
 
     /**
-     * Loads all reusable worlds on the main thread, but staggered one per tick
-     * instead of all at once, so the server doesn't spike CPU during startup.
-     * Worlds ready before the first match, since the lobby has a long countdown.
+     * Loads and pre-generates pooled worlds sequentially.
+     *
+     * <p>The next world does not start loading until the previous world has
+     * completely finished its spawn pre-generation.
+     *
+     * <pre>
+     * ds_0 -> load -> generate -> READY
+     *                         |
+     *                         v
+     * ds_1 -> load -> generate -> READY
+     *                         |
+     *                         v
+     * ds_2 -> load -> generate -> READY
+     * </pre>
      */
     private void warmUp() {
-        Iterator<WorldInstance> iterator = instances.iterator();
-        Bukkit.getScheduler().runTaskTimer(plugin, task -> {
-            if (iterator.hasNext()) {
-                loadInstance(iterator.next());
-            } else {
-                task.cancel();
-            }
-        }, 1L, 1L);
+        warmUpNext(0);
     }
 
-    private void preGenerateSpawn(WorldInstance instance) {
+    private void warmUpNext(int index) {
+        if (index >= instances.size()) {
+            return;
+        }
+
+        WorldInstance instance = instances.get(index);
+
+        Bukkit.getGlobalRegionScheduler().run(plugin, _ -> {
+            loadInstance(instance, () -> {
+                warmUpNext(index + 1);
+            });
+        });
+    }
+
+    /**
+     * Pre-generates the configured spawn area asynchronously.
+     *
+     * <p>The callback is invoked only after all requested chunks have finished
+     * generating.
+     */
+    private void preGenerateSpawn(
+            WorldInstance instance,
+            Runnable onReady
+    ) {
         World world = instance.getWorld();
 
-        int radius = plugin.getMainConfig().worlds().preGenerateRadius();
+        int radius = plugin.getMainConfig()
+                .worlds()
+                .preGenerateRadius();
 
         Location spawn = world.getSpawnLocation();
 
@@ -221,6 +309,7 @@ public class WorldPool {
 
         if (radius <= 0) {
             instance.markSpawnReady();
+            onReady.run();
             return;
         }
 
@@ -234,19 +323,24 @@ public class WorldPool {
                 minZ,
                 maxX,
                 maxZ,
-                true,
-                () -> Bukkit.getGlobalRegionScheduler().run(plugin, _ -> {
-                    int x = world.getSpawnLocation().getBlockX();
-                    int z = world.getSpawnLocation().getBlockZ();
+                false,
+                () -> Bukkit.getGlobalRegionScheduler().run(
+                        plugin,
+                        _ -> {
+                            int x = world.getSpawnLocation().getBlockX();
+                            int z = world.getSpawnLocation().getBlockZ();
 
-                    world.setSpawnLocation(
-                            x,
-                            world.getHighestBlockYAt(x, z) + 1,
-                            z
-                    );
+                            world.setSpawnLocation(
+                                    x,
+                                    world.getHighestBlockYAt(x, z) + 1,
+                                    z
+                            );
 
-                    instance.markSpawnReady();
-                })
+                            instance.markSpawnReady();
+
+                            onReady.run();
+                        }
+                )
         );
     }
 }
