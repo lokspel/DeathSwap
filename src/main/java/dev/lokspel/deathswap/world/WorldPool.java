@@ -5,6 +5,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.GameRules;
 import org.bukkit.Location;
 import org.bukkit.World;
+import org.bukkit.WorldBorder;
 import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
@@ -73,24 +74,28 @@ public class WorldPool {
             // During shutdown the plugin is disabled and can't register scheduler
             // tasks, so fall back to the synchronous unload/clear path.
             if (!plugin.isEnabled()) {
-                for (World w : instance.allWorlds()) {
-                    for (Player player : w.getPlayers()) {
-                        teleportToLobby(player);
-                    }
-                }
+                evacuate(instance);
                 reset.clearNow(instance);
                 return;
             }
 
             Bukkit.getGlobalRegionScheduler().run(plugin, task -> {
-                for (World w : instance.allWorlds()) {
-                    for (Player player : w.getPlayers()) {
-                        teleportToLobby(player);
-                    }
-                }
+                evacuate(instance);
                 reset.reset(instance, () -> loadInstance(instance));
             });
             return;
+        }
+    }
+
+    /**
+     * Teleports any player still in any of the instance's worlds back to the
+     * lobby, so a world is never torn down while a player occupies it.
+     */
+    private void evacuate(WorldInstance instance) {
+        for (World world : instance.allWorlds()) {
+            for (Player player : world.getPlayers()) {
+                teleportToLobby(player);
+            }
         }
     }
 
@@ -152,7 +157,27 @@ public class WorldPool {
     private void loadInstance(WorldInstance instance) {
         instance.load();
         applySpawnRule(instance);
+        applyBorder(instance);
         preGenerateSpawn(instance.getWorld());
+    }
+
+    /**
+     * Applies the configured world border size (in blocks) to every world of
+     * the instance, centred on that world's spawn. {@code 0} resets it to the
+     * server default.
+     */
+    private void applyBorder(WorldInstance instance) {
+        int size = plugin.getMainConfig().worlds().border();
+        for (World world : instance.allWorlds()) {
+            WorldBorder border = world.getWorldBorder();
+            if (size <= 0) {
+                border.reset();
+                continue;
+            }
+            Location spawn = world.getSpawnLocation();
+            border.setCenter(spawn.getX(), spawn.getZ());
+            border.setSize(size);
+        }
     }
 
     /**

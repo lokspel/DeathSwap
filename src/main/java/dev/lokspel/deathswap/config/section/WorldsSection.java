@@ -29,6 +29,10 @@ public class WorldsSection {
         return config().getInt(PATH + "spawn-radius", 100);
     }
 
+    public int border() {
+        return config().getInt(PATH + "border", 3000);
+    }
+
     public String namePrefix() {
         return config().getString(PATH + "name-prefix", "deathswap");
     }

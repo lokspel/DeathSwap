@@ -121,12 +121,10 @@ public class MatchManager {
         if (r <= 0) return spawn.clone();
 
         ThreadLocalRandom random = ThreadLocalRandom.current();
-        return new Location(gameWorld,
-            spawn.getBlockX() + random.nextInt(-r, r + 1) + 0.5,
-            spawn.getY(),
-            spawn.getBlockZ() + random.nextInt(-r, r + 1) + 0.5,
-            spawn.getYaw(),
-            spawn.getPitch());
+        int x = spawn.getBlockX() + random.nextInt(-r, r + 1);
+        int z = spawn.getBlockZ() + random.nextInt(-r, r + 1);
+        int y = gameWorld.getHighestBlockYAt(x, z) + 1;
+        return new Location(gameWorld, x + 0.5, y, z + 0.5, spawn.getYaw(), spawn.getPitch());
     }
 
     public void onPlayerDeath(Player player) {

@@ -29,5 +29,6 @@ worlds:
   count: 5                # Number of persistent reusable worlds (each = one concurrent match)
   pre-generate-radius: 7  # Pre-generate spawn chunks around the spawn, 0 = off
   spawn-radius: 100       # Per-world random respawn radius around spawn, 0 = exact spawn
+  border: 3000             # World border size in blocks (centered on spawn), 0 = disabled
   name-prefix: ds  # Prefix for generated world names (e.g. "ds_0")
   generate-dimensions: true   # Give every game world its own nether and end (false = share server defaults)
