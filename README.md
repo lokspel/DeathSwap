@@ -30,20 +30,26 @@ Last-player-standing minigame for Paper. Join a lobby, teleport to a fresh world
 ### `config.yml`
 
 ```yaml
+# DeathSwap Configuration
+
 game:
-  min-players-to-start: 2
-  start-delay: 120
-  min-players-fast-start: 4
-  fast-start-delay: 20
-  swap-interval: 300
-  countdown-seconds: 5
-  max-deaths: 5
-  max-match-time: 0         # Max match length in minutes, 0 = unlimited
-  pvp-enabled: false
+  # Start Countdown — configures the pre-game lobby timer
+  min-players-to-start: 2     # Players needed for countdown to begin
+  start-delay: 120            # Countdown in seconds (2 min = 120)
+  min-players-fast-start: 4   # At 4+ players timer shrinks
+  fast-start-delay: 20        # Shortened countdown in seconds
+
+  # In-Game Rules
+  swap-interval: 300          # Seconds between swaps
+  countdown-seconds: 5        # Warning countdown before each swap
+  max-deaths: 5               # Deaths before elimination
+  max-match-time: 0           # Max match length in minutes, 0 = unlimited
+  pvp-enabled: false           # Allow players to damage each other
+  isolate-chat: true           # Keep chat between players in the same match
 
   # Display Options
-  scoreboard-enabled: true   # Show the in-match sidebar scoreboard
-  actionbar-enabled: true    # Show HUD countdowns (lobby start + swap warning)
+  scoreboard-enabled: true    # Show the in-match sidebar scoreboard
+  actionbar-enabled: true     # Show HUD countdowns (lobby start + swap warning)
 
 sounds:
   countdown-tick: entity.note.pling
@@ -52,11 +58,12 @@ sounds:
   win: ui.toast.challenge_complete
 
 worlds:
-  count: 5                # Number of reusable worlds (each = one concurrent match)
+  count: 5                # Number of persistent reusable worlds (each = one concurrent match)
   pre-generate-radius: 7  # Pre-generate spawn chunks around the spawn, 0 = off
   spawn-radius: 100       # Per-world random respawn radius around spawn, 0 = exact spawn
-  name-prefix: ds         # Prefix for generated world names (e.g. "ds_0")
-  generate-dimensions: true   # Give every game world its own nether and end
+  border: 3000             # World border size in blocks (centered on spawn), 0 = disabled
+  name-prefix: ds  # Prefix for generated world names (e.g. "ds_0")
+  generate-dimensions: true   # Give every game world its own nether and end (false = share server defaults)
 ```
 
 > When `max-match-time` is reached, the alive player with the fewest deaths wins; if tied, the `time-up` message lists the players.
