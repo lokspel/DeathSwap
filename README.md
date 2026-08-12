@@ -62,8 +62,8 @@ Requires [PlaceholderAPI](https://placeholderapi.com). The expansion registers u
 | `%deathswap_deaths%` | Current death count in the match (`0` if not in a match) |
 | `%deathswap_deaths_left%` | Deaths remaining before elimination |
 | `%deathswap_max_deaths%` | `max-deaths` configured limit |
-| `%deathswap_lobby_players%` | Players currently waiting in the lobby |
-| `%deathswap_lobby_required%` | `min-players-to-start` needed to start |
+| `%deathswap_players_in_lobby%` | Players currently waiting in the lobby |
+| `%deathswap_min_players%` | `min-players-to-start` required to start |
 | `%deathswap_swap_interval%` | `swap-interval` configured seconds between swaps |
 
 ## Building

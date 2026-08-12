@@ -51,8 +51,8 @@ public class PlayerExpansion extends PlaceholderExpansion {
             case "deaths" -> String.valueOf(api.getDeaths(player));
             case "deaths_left" -> String.valueOf(Math.max(0, cfg.game().maxDeaths() - api.getDeaths(player)));
             case "max_deaths" -> String.valueOf(cfg.game().maxDeaths());
-            case "lobby_players" -> String.valueOf(plugin.getGameManager().lobbySize());
-            case "lobby_required" -> String.valueOf(cfg.game().minPlayersToStart());
+            case "players_in_lobby" -> String.valueOf(plugin.getGameManager().lobbySize());
+            case "min_players" -> String.valueOf(cfg.game().minPlayersToStart());
             case "swap_interval" -> String.valueOf(cfg.game().swapInterval());
             default -> null;
         };
