@@ -25,6 +25,10 @@ public class GameSection {
         return config().getInt(PATH + "max-deaths", 5);
     }
 
+    public int maxMatchTime() {
+        return config().getInt(PATH + "max-match-time", 0);
+    }
+
     public int countdownSeconds() {
         return config().getInt(PATH + "countdown-seconds", 5);
     }

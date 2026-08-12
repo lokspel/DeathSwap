@@ -36,6 +36,7 @@ eliminated: "%prefix%<red>You have been eliminated!</red>"
 player-eliminated: "%prefix%<white><player></white> <red>has been eliminated.</red>"
 deaths-left: "%prefix%<gray>Deaths remaining:</gray> <red><deaths></red>"
 winner: "%prefix%<gold><player></gold> <green>has won the DeathSwap game!</green>"
+time-up: "%prefix%<yellow>Time is up!</yellow> <white><players></white> <yellow>The match has ended.</yellow>"
 
 # Game Stop
 game-stopped: "<red>The DeathSwap game has been stopped.</red>"

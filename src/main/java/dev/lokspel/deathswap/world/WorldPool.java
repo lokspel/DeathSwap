@@ -2,6 +2,7 @@ package dev.lokspel.deathswap.world;
 
 import dev.lokspel.deathswap.DeathSwap;
 import org.bukkit.Bukkit;
+import org.bukkit.GameRules;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
@@ -28,9 +29,10 @@ public class WorldPool {
 
         int count = Math.max(1, plugin.getMainConfig().worlds().count());
         String prefix = plugin.getMainConfig().worlds().namePrefix();
+        boolean dimensions = plugin.getMainConfig().worlds().generateDimensions();
         WorldLoader loader = new WorldLoader();
         for (int i = 0; i < count; i++) {
-            instances.add(new WorldInstance(prefix + "_" + i, loader));
+            instances.add(new WorldInstance(prefix + "_" + i, loader, dimensions));
         }
         warmUp();
     }
@@ -69,8 +71,10 @@ public class WorldPool {
             if (!instance.owns(world)) continue;
 
             Bukkit.getGlobalRegionScheduler().run(plugin, task -> {
-                for (Player player : world.getPlayers()) {
-                    teleportToLobby(player);
+                for (World w : instance.allWorlds()) {
+                    for (Player player : w.getPlayers()) {
+                        teleportToLobby(player);
+                    }
                 }
                 reset.reset(instance, () -> loadInstance(instance));
             });
@@ -123,7 +127,7 @@ public class WorldPool {
     private WorldInstance findReadyInstance() {
         List<WorldInstance> ready = new ArrayList<>();
         for (WorldInstance instance : instances) {
-            if (instance.isFree() && instance.getWorld() != null) ready.add(instance);
+            if (instance.isFree() && instance.isLoaded()) ready.add(instance);
         }
         if (ready.isEmpty()) return null;
         return ready.get(ThreadLocalRandom.current().nextInt(ready.size()));
@@ -135,7 +139,20 @@ public class WorldPool {
      */
     private void loadInstance(WorldInstance instance) {
         instance.load();
+        applySpawnRule(instance);
         preGenerateSpawn(instance.getWorld());
+    }
+
+    /**
+     * Applies the configurable spawn-radius as the per-world
+     * {@code respawn_radius} gamerule. It is read back by the match when
+     * computing a random respawn point, keeping the radius per world.
+     */
+    private void applySpawnRule(WorldInstance instance) {
+        int radius = Math.max(0, plugin.getMainConfig().worlds().spawnRadius());
+        for (World world : instance.allWorlds()) {
+            world.setGameRule(GameRules.RESPAWN_RADIUS, radius);
+        }
     }
 
     /**

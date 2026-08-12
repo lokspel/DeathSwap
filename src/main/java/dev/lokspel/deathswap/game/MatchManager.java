@@ -13,14 +13,20 @@ import dev.lokspel.deathswap.util.SoundUtil;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
+import org.bukkit.GameRules;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
+import org.bukkit.scheduler.BukkitTask;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ThreadLocalRandom;
+import java.util.stream.Collectors;
 
 public class MatchManager {
 
@@ -35,6 +41,7 @@ public class MatchManager {
     private final SwapManager swap;
     private final MatchScoreboard scoreboard;
     private final Runnable onEnd;
+    private BukkitTask timeoutTask;
     private boolean cleanedUp;
 
     public MatchManager(DeathSwap plugin, List<Player> players, Runnable onEnd) {
@@ -72,14 +79,19 @@ public class MatchManager {
         scheduleNextSwap();
         broadcast(messages.prefixed("game-started"));
 
+        int maxTime = cfg.game().maxMatchTime();
+        if (maxTime > 0) {
+            timeoutTask = Bukkit.getScheduler().runTaskLater(plugin, this::onTimeUp, maxTime * 1200L);
+        }
+
         Bukkit.getPluginManager().callEvent(new MatchStartEvent(players, gameWorld));
     }
 
     /**
-     * Handles a respawn of an in-match player. Returns the location to respawn
-     * at (the game world spawn), or {@code null} if the player is not in the
-     * match. The caller must apply it via {@code PlayerRespawnEvent#setRespawnLocation},
-     * as a direct teleport is overridden by the event afterward.
+     * Handles a respawn of an in-match player. Returns a random point near the
+     * game world's spawn within the configured {@code spawn-radius} (exact spawn
+     * when the radius is 0). The location is set explicitly because relying on
+     * the default respawn would send eliminated players back to the lobby.
      */
     public Location onPlayerRespawn(Player player) {
         if (!playerUuids.contains(player.getUniqueId())) return null;
@@ -88,13 +100,33 @@ public class MatchManager {
             player.setGameMode(GameMode.SPECTATOR);
         }
 
-        Location location = gameWorld.getSpawnLocation();
+        Location location = randomSpawn();
         refreshScoreboard();
 
         if (spectators.contains(player.getUniqueId())) {
             checkWinner();
         }
         return location;
+    }
+
+    /**
+     * A spawn point near the game world's spawn, randomly offset within the
+     * configured {@code spawn-radius}. The Y is placed on the terrain surface to
+     * avoid spawning in the air or underground.
+     */
+    private Location randomSpawn() {
+        Location spawn = gameWorld.getSpawnLocation();
+        Integer radius = gameWorld.getGameRuleValue(GameRules.RESPAWN_RADIUS);
+        int r = radius == null ? 0 : radius;
+        if (r <= 0) return spawn.clone();
+
+        ThreadLocalRandom random = ThreadLocalRandom.current();
+        return new Location(gameWorld,
+            spawn.getBlockX() + random.nextInt(-r, r + 1) + 0.5,
+            spawn.getY(),
+            spawn.getBlockZ() + random.nextInt(-r, r + 1) + 0.5,
+            spawn.getYaw(),
+            spawn.getPitch());
     }
 
     public void onPlayerDeath(Player player) {
@@ -204,6 +236,48 @@ public class MatchManager {
         cleanupNow(winner);
     }
 
+    /**
+     * Ends the match when the configured time limit runs out. The survivor (or
+     * the alive player with the fewest deaths) wins; if no single leader can be
+     * decided the match ends with no winner.
+     */
+    private void onTimeUp() {
+        cancelTasks();
+
+        List<Player> alive = new ArrayList<>(deaths.getAlivePlayers());
+        Set<Player> leaders = lowestDeathPlayers(alive);
+
+        Player winner = leaders.size() == 1 ? leaders.iterator().next() : null;
+        if (winner != null) {
+            broadcast(messages.prefixed("winner", "player", winner.getName()));
+            broadcastSound(cfg.sounds().win());
+            winner.setGameMode(GameMode.SURVIVAL);
+        } else {
+            String names = leaders.stream()
+                    .map(Player::getName)
+                    .collect(Collectors.joining(", "));
+            broadcast(messages.prefixed("time-up", "players", names));
+        }
+
+        cleanupNow(winner);
+    }
+
+    private Set<Player> lowestDeathPlayers(List<Player> players) {
+        Set<Player> lowest = new LinkedHashSet<>();
+        int min = Integer.MAX_VALUE;
+        for (Player player : players) {
+            int d = deaths.get(player.getUniqueId());
+            if (d < min) {
+                min = d;
+                lowest.clear();
+                lowest.add(player);
+            } else if (d == min) {
+                lowest.add(player);
+            }
+        }
+        return lowest;
+    }
+
     public void stop() {
         cancelTasks();
         cleanupNow(null);
@@ -231,5 +305,9 @@ public class MatchManager {
 
     private void cancelTasks() {
         swap.cancel();
+        if (timeoutTask != null) {
+            timeoutTask.cancel();
+            timeoutTask = null;
+        }
     }
 }

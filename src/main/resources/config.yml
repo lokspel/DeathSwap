@@ -11,6 +11,7 @@ game:
   swap-interval: 300          # Seconds between swaps
   countdown-seconds: 5        # Warning countdown before each swap
   max-deaths: 5               # Deaths before elimination
+  max-match-time: 0           # Max match length in minutes, 0 = unlimited
   pvp-enabled: false           # Allow players to damage each other
   isolate-chat: true           # Keep chat between players in the same match
 
@@ -26,5 +27,7 @@ sounds:
 
 worlds:
   count: 5                # Number of persistent reusable worlds (each = one concurrent match)
-  pre-generate-radius: 8  # Pre-generate spawn chunks around the spawn, 0 = off
-  name-prefix: deathswap  # Prefix for generated world names (e.g. "deathswap_0")
+  pre-generate-radius: 7  # Pre-generate spawn chunks around the spawn, 0 = off
+  spawn-radius: 100       # GameRule spawnRadius: random respawn range around spawn, 0 = exact spawn
+  name-prefix: ds  # Prefix for generated world names (e.g. "ds_0")
+  generate-dimensions: true   # Give every game world its own nether and end (false = share server defaults)

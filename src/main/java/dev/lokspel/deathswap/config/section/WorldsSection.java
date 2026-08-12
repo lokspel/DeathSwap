@@ -22,10 +22,18 @@ public class WorldsSection {
     }
 
     public int preGenerateRadius() {
-        return config().getInt(PATH + "pre-generate-radius", 8);
+        return config().getInt(PATH + "pre-generate-radius", 7);
+    }
+
+    public int spawnRadius() {
+        return config().getInt(PATH + "spawn-radius", 100);
     }
 
     public String namePrefix() {
         return config().getString(PATH + "name-prefix", "deathswap");
+    }
+
+    public boolean generateDimensions() {
+        return config().getBoolean(PATH + "generate-dimensions", true);
     }
 }

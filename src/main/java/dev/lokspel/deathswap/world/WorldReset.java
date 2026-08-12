@@ -29,14 +29,16 @@ final class WorldReset {
      * @param onReloaded run on the main thread after the world is reloaded
      */
     void reset(WorldInstance instance, Runnable onReloaded) {
-        World world = instance.getWorld();
-        Path regionFolder = world.getWorldFolder().toPath().resolve("region");
-
-        Bukkit.unloadWorld(world, false);
+        World[] worlds = instance.allWorlds();
+        for (World world : worlds) {
+            Bukkit.unloadWorld(world, false);
+        }
         instance.markResetting();
 
         CompletableFuture.runAsync(() -> {
-            clearRegionFiles(regionFolder);
+            for (World world : worlds) {
+                clearRegionFiles(world.getWorldFolder().toPath().resolve("region"));
+            }
             Bukkit.getGlobalRegionScheduler().run(plugin, task -> {
                 instance.reset();
                 onReloaded.run();
@@ -45,16 +47,16 @@ final class WorldReset {
     }
 
     /**
-     * Synchronously unloads and clears an instance's world. Used on shutdown,
+     * Synchronously unloads and clears an instance's worlds. Used on shutdown,
      * where an asynchronous reset would not finish before the server exits.
      */
     void clearNow(WorldInstance instance) {
-        World world = instance.getWorld();
-        if (world == null) return;
+        for (World world : instance.allWorlds()) {
+            if (world == null) continue;
 
-        Path regionFolder = world.getWorldFolder().toPath().resolve("region");
-        Bukkit.unloadWorld(world, false);
-        clearRegionFiles(regionFolder);
+            Bukkit.unloadWorld(world, false);
+            clearRegionFiles(world.getWorldFolder().toPath().resolve("region"));
+        }
     }
 
     private void clearRegionFiles(Path regionFolder) {
