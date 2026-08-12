@@ -15,11 +15,9 @@ import java.util.function.Supplier;
 public class SwapManager {
 
     private final DeathSwap plugin;
-    private BukkitTask delayTask;
-    private BukkitTask countdownTask;
-    private int countdownRemaining;
-    private int delayRemaining;
-    private boolean inDelay;
+    private BukkitTask swapTask;
+    private int totalRemaining;
+    private int countdownSeconds;
 
     public SwapManager(DeathSwap plugin) {
         this.plugin = plugin;
@@ -27,63 +25,46 @@ public class SwapManager {
 
     public void scheduleNext(Runnable onSwapComplete, Supplier<Set<Player>> aliveSupplier) {
         var cfg = plugin.getMainConfig();
-        long delay = Math.max(1, (long) cfg.game().swapInterval() - cfg.game().countdownSeconds());
-
-        inDelay = true;
-        delayRemaining = (int) delay;
-
-        delayTask = Bukkit.getScheduler().runTaskTimer(plugin, () -> {
-            if (--delayRemaining > 0) return;
-
-            delayTask.cancel();
-            delayTask = null;
-            inDelay = false;
-            if (aliveSupplier.get().size() < 2) return;
-            startCountdown(onSwapComplete, aliveSupplier);
-        }, 1L, 20L);
-    }
-
-    /**
-     * Seconds remaining until the next swap, or the full configured interval
-     * when no swap is pending. 0 means a swap is happening right now.
-     */
-    public int secondsUntilSwap() {
-        if (inDelay) {
-            return delayRemaining;
-        }
-        if (countdownTask != null) {
-            return countdownRemaining;
-        }
-        return plugin.getMainConfig().game().swapInterval();
-    }
-
-    private void startCountdown(Runnable onSwapComplete, Supplier<Set<Player>> aliveSupplier) {
-        var cfg = plugin.getMainConfig();
-        countdownRemaining = cfg.game().countdownSeconds();
+        countdownSeconds = Math.max(1, cfg.game().countdownSeconds());
+        totalRemaining = Math.max(countdownSeconds + 1, cfg.game().swapInterval());
         var messages = cfg.messages();
         var tickSound = SoundUtil.minecraft(cfg.sounds().countdownTick());
         boolean showHud = cfg.game().actionbarEnabled();
 
-        countdownTask = Bukkit.getScheduler().runTaskTimer(plugin, () -> {
-            if (countdownRemaining <= 0) {
+        swapTask = Bukkit.getScheduler().runTaskTimer(plugin, () -> {
+            totalRemaining--;
+
+            if (totalRemaining <= 0) {
+                swapTask.cancel();
+                swapTask = null;
                 onSwapComplete.run();
-                countdownTask.cancel();
-                countdownTask = null;
                 return;
             }
 
-            var msg = messages.get("countdown", "seconds", String.valueOf(countdownRemaining));
-            var alive = aliveSupplier.get();
+            if (totalRemaining <= countdownSeconds) {
+                var msg = messages.get("countdown", "seconds", String.valueOf(totalRemaining));
+                var alive = aliveSupplier.get();
 
-            for (Player player : alive) {
-                if (showHud) {
-                    PlayerUtil.showCountdownTitle(player, msg);
+                for (Player player : alive) {
+                    if (showHud) {
+                        PlayerUtil.showCountdownTitle(player, msg);
+                    }
+                    player.playSound(tickSound);
                 }
-                player.playSound(tickSound);
             }
+        }, 1L, 20L);
+    }
 
-            countdownRemaining--;
-        }, 0L, 20L);
+    /**
+     * Seconds remaining until the next swap as a single continuous countdown,
+     * or the full configured interval when no swap is pending. 0 means a swap
+     * is happening right now.
+     */
+    public int secondsUntilSwap() {
+        if (swapTask == null) {
+            return plugin.getMainConfig().game().swapInterval();
+        }
+        return Math.max(1, totalRemaining);
     }
 
     public void executeSwap(Set<Player> alivePlayers) {
@@ -119,13 +100,9 @@ public class SwapManager {
     }
 
     public void cancel() {
-        if (delayTask != null) {
-            delayTask.cancel();
-            delayTask = null;
-        }
-        if (countdownTask != null) {
-            countdownTask.cancel();
-            countdownTask = null;
+        if (swapTask != null) {
+            swapTask.cancel();
+            swapTask = null;
         }
     }
 }
