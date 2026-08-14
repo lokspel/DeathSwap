@@ -39,7 +39,7 @@ final class WorldReset {
             for (World world : worlds) {
                 clearRegionFiles(world.getWorldFolder().toPath().resolve("region"));
             }
-            Bukkit.getGlobalRegionScheduler().run(plugin, task -> {
+            Bukkit.getGlobalRegionScheduler().run(plugin, _ -> {
                 instance.reset();
                 onReloaded.run();
             });

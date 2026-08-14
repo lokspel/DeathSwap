@@ -98,7 +98,15 @@ public class GameManager {
         lobby.clear();
 
         UUID matchId = UUID.randomUUID();
-        matches.put(matchId, new MatchManager(plugin, new ArrayList<>(players), world, () -> matches.remove(matchId)));
+        matches.put(matchId, new MatchManager(plugin, new ArrayList<>(players), world, () -> {
+            matches.remove(matchId);
+            if (plugin.getPlayerHider() != null) {
+                plugin.getPlayerHider().refreshVisibility();
+            }
+        }));
+        if (plugin.getPlayerHider() != null) {
+            plugin.getPlayerHider().refreshVisibility();
+        }
     }
 
     public void stop() {

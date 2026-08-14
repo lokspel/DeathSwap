@@ -2,6 +2,7 @@ name: DeathSwap
 version: 1.0.1
 main: dev.lokspel.deathswap.DeathSwap
 api-version: '1.21'
+softdepend: [PlaceholderAPI, packetevents]
 commands:
   deathswap:
     description: Main DeathSwap command

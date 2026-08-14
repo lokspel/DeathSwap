@@ -2,6 +2,9 @@ package dev.lokspel.deathswap;
 
 import dev.lokspel.deathswap.api.DeathSwapAPI;
 import dev.lokspel.deathswap.util.SoftDependUtil;
+import dev.lokspel.deathswap.util.entityhider.PlayerHider;
+import com.github.retrooper.packetevents.PacketEvents;
+import io.github.retrooper.packetevents.factory.spigot.SpigotPacketEventsBuilder;
 import dev.lokspel.deathswap.util.placeholderapi.PlayerExpansion;
 import dev.lokspel.deathswap.command.CommandDispatcher;
 import dev.lokspel.deathswap.command.JoinCommand;
@@ -13,6 +16,7 @@ import dev.lokspel.deathswap.command.StopCommand;
 import dev.lokspel.deathswap.command.RegisteredCommand;
 import dev.lokspel.deathswap.config.MainConfig;
 import dev.lokspel.deathswap.listener.AsyncChatListener;
+import dev.lokspel.deathswap.listener.PlayerAdvancementDoneListener;
 import dev.lokspel.deathswap.listener.EntityDamageListener;
 import dev.lokspel.deathswap.listener.PlayerDeathListener;
 import dev.lokspel.deathswap.listener.PlayerQuitListener;
@@ -35,12 +39,27 @@ public class DeathSwap extends JavaPlugin {
     private MainConfig mainConfig;
     private WorldPool worldPool;
     private GameManager gameManager;
+    private PlayerHider playerHider;
+
+    @Override
+    public void onLoad() {
+        instance = this;
+
+        if (SoftDependUtil.PACKET_EVENTS_ENABLED) {
+            PacketEvents.setAPI(SpigotPacketEventsBuilder.build(this));
+            PacketEvents.getAPI().load();
+        }
+    }
 
     @Override
     public void onEnable() {
         instance = this;
 
         mainConfig = new MainConfig(this);
+        if (SoftDependUtil.PACKET_EVENTS_ENABLED) {
+            PacketEvents.getAPI().init();
+            playerHider = new PlayerHider(this);
+        }
 
         new Metrics(this, 33306);
 
@@ -61,6 +80,7 @@ public class DeathSwap extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new PlayerDeathListener(this), this);
         getServer().getPluginManager().registerEvents(new PlayerQuitListener(this), this);
         getServer().getPluginManager().registerEvents(new AsyncChatListener(this), this);
+        getServer().getPluginManager().registerEvents(new PlayerAdvancementDoneListener(this), this);
         getServer().getPluginManager().registerEvents(new EntityDamageListener(this), this);
         getServer().getPluginManager().registerEvents(new PlayerRespawnListener(this), this);
 
@@ -79,6 +99,9 @@ public class DeathSwap extends JavaPlugin {
         }
         if (worldPool != null) {
             worldPool.shutdown();
+        }
+        if (SoftDependUtil.PACKET_EVENTS_ENABLED) {
+            PacketEvents.getAPI().terminate();
         }
     }
 

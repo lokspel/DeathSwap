@@ -99,7 +99,7 @@ public class LobbyManager {
                 return;
             }
 
-            if (cfg.game().actionbarEnabled()) {
+            if (cfg.display().actionbar()) {
                 var msg = cfg.messages().get("starting", "seconds", String.valueOf(remainingCountdown - 1));
                 for (Player player : PlayerUtil.getOnlinePlayers(players)) {
                     PlayerUtil.showActionBar(player, msg);
@@ -111,7 +111,7 @@ public class LobbyManager {
     }
 
     private void showNeedsPlayers() {
-        if (!plugin.getMainConfig().game().actionbarEnabled()) return;
+        if (!plugin.getMainConfig().display().actionbar()) return;
         int required = plugin.getMainConfig().game().minPlayersToStart();
         var msg = plugin.getMainConfig().messages().get(
                 "needs-players",

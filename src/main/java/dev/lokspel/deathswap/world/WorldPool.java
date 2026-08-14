@@ -279,11 +279,7 @@ public class WorldPool {
 
         WorldInstance instance = instances.get(index);
 
-        Bukkit.getGlobalRegionScheduler().run(plugin, _ -> {
-            loadInstance(instance, () -> {
-                warmUpNext(index + 1);
-            });
-        });
+        Bukkit.getGlobalRegionScheduler().run(plugin, _ -> loadInstance(instance, () -> warmUpNext(index + 1)));
     }
 
     /**

@@ -9,7 +9,9 @@ Last-player-standing minigame for Paper. Join a lobby, teleport to a fresh world
 - Death tracking with configurable lives; last one standing wins
 - Optional match time limit with winner-by-fewest-deaths (and tie messaging)
 - Toggleable sidebar scoreboard and HUD countdowns
-- Scoped match chat, PvP toggle, configurable sounds
+- Scoped match visibility (chat, death, advancement messages) across concurrent matches
+- Optional tab-list hiding of in-match players (requires PacketEvents)
+- PvP toggle, configurable sounds
 - Fresh temporary world per match, deleted on game end
 - Optional per-match nether and end dimensions (own portals per game)
 - Configurable per-world random respawn radius around spawn
@@ -44,12 +46,17 @@ game:
   countdown-seconds: 5        # Warning countdown before each swap
   max-deaths: 5               # Deaths before elimination
   max-match-time: 0           # Max match length in minutes, 0 = unlimited
-  pvp-enabled: false           # Allow players to damage each other
-  isolate-chat: true           # Keep chat between players in the same match
+  pvp-enabled: false          # Allow players to damage each other
 
-  # Display Options
-  scoreboard-enabled: true    # Show the in-match sidebar scoreboard
-  actionbar-enabled: true     # Show HUD countdowns (lobby start + swap warning)
+display:
+  scoreboard: true           # Show the in-match sidebar scoreboard
+  actionbar: true            # Show HUD countdowns (lobby start + swap warning)
+
+hide:
+  isolate-chat: true          # Keep chat between players in the same match
+  isolate-deaths: true        # Keep death messages between players in the same match
+  isolate-achievements: true  # Keep advancement messages between players in the same match
+  match-players-in-tab: false # Hide players in a match from the tab list of players outside that match (requires PacketEvents)
 
 sounds:
   countdown-tick: entity.note.pling
@@ -101,3 +108,8 @@ The output jar is `target/DeathSwap-1.0.1.jar`.
 
 - Paper 1.21.11+ (api-version 26.2)
 - Java 25
+- Optional: [PacketEvents](https://github.com/retrooper/packetevents) for the `hide.match-players-in-tab` feature. When not installed, the plugin still works; only tab-list hiding is unavailable.
+
+## Tab hiding (PacketEvents)
+
+Scoped match visibility isolates players across concurrent matches: chat, death and advancement messages only reach players in the same match. When `hide.match-players-in-tab` is enabled (and PacketEvents is installed), in-match players are also removed from the tab list of players outside their match — a lobby player can't see match participants, and each match only shows its own members. The plugin reloads these settings on `/deathswap reload`, including for already-running matches.

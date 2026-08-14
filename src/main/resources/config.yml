@@ -12,12 +12,17 @@ game:
   countdown-seconds: 5        # Warning countdown before each swap
   max-deaths: 5               # Deaths before elimination
   max-match-time: 0           # Max match length in minutes, 0 = unlimited
-  pvp-enabled: false           # Allow players to damage each other
-  isolate-chat: true           # Keep chat between players in the same match
+  pvp-enabled: false          # Allow players to damage each other
 
-  # Display Options
-  scoreboard-enabled: true    # Show the in-match sidebar scoreboard
-  actionbar-enabled: true     # Show HUD countdowns (lobby start + swap warning)
+display:
+  scoreboard: true           # Show the in-match sidebar scoreboard
+  actionbar: true            # Show HUD countdowns (lobby start + swap warning)
+
+hide:
+  isolate-chat: true          # Keep chat between players in the same match
+  isolate-deaths: true        # Keep death messages between players in the same match
+  isolate-achievements: true  # Keep advancement messages between players in the same match
+  match-players-in-tab: false # Hide players in a match from the tab list of players outside that match (requires PacketEvents installed)
 
 sounds:
   countdown-tick: entity.note.pling

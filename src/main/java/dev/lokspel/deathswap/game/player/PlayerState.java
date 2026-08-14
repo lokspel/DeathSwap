@@ -80,7 +80,9 @@ public final class PlayerState {
         player.setExp(this.exp);
         player.setTotalExperience(this.totalExperience);
 
-        player.setHealth(Math.min(this.health, player.getAttribute(Attribute.MAX_HEALTH).getValue()));
+        var maxHealth = player.getAttribute(Attribute.MAX_HEALTH);
+        double max = maxHealth != null ? maxHealth.getValue() : this.health;
+        player.setHealth(Math.min(this.health, max));
         player.setFoodLevel(this.foodLevel);
         player.setSaturation(this.saturation);
 

@@ -29,7 +29,7 @@ public class SwapManager {
         totalRemaining = Math.max(countdownSeconds + 1, cfg.game().swapInterval());
         var messages = cfg.messages();
         var tickSound = SoundUtil.minecraft(cfg.sounds().countdownTick());
-        boolean showHud = cfg.game().actionbarEnabled();
+        boolean showHud = cfg.display().actionbar();
 
         swapTask = Bukkit.getScheduler().runTaskTimer(plugin, () -> {
             totalRemaining--;

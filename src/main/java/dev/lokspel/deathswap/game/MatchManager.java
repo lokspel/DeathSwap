@@ -70,7 +70,7 @@ public class MatchManager {
         }
 
         deaths.init(playerUuids);
-        if (cfg.game().scoreboardEnabled()) {
+        if (cfg.display().scoreboard()) {
             scoreboard.init(messages.get("scoreboard-title"));
             refreshScoreboard();
         }
@@ -194,7 +194,7 @@ public class MatchManager {
     }
 
     private void refreshScoreboard() {
-        if (!cfg.game().scoreboardEnabled()) return;
+        if (!cfg.display().scoreboard()) return;
         scoreboard.update(deaths.getAll());
         scoreboard.apply(deaths.getAll().keySet());
     }

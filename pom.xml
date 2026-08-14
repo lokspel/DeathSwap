@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>dev.lokspel</groupId>
   <artifactId>DeathSwap</artifactId>
-  <version>1.0.1</version>
+  <version>1.0.2</version>
   <name>DeathSwap</name>
 
   <properties>
@@ -14,6 +14,7 @@
     <paper.version>26.2.build.112-stable</paper.version>
     <placeholderapi.version>2.12.3</placeholderapi.version>
     <bstats.version>3.2.1</bstats.version>
+    <packetevents.version>2.13.0</packetevents.version>
 
     <!-- Build tooling -->
     <lombok.version>1.18.42</lombok.version>
@@ -30,6 +31,10 @@
     <repository>
       <id>placeholderapi</id>
       <url>https://repo.helpch.at/releases/</url>
+    </repository>
+    <repository>
+      <id>codemc-releases</id>
+      <url>https://repo.codemc.io/repository/maven-releases/</url>
     </repository>
   </repositories>
 
@@ -54,6 +59,12 @@
       <artifactId>bstats-bukkit</artifactId>
       <version>${bstats.version}</version>
       <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.github.retrooper</groupId>
+      <artifactId>packetevents-spigot</artifactId>
+      <version>${packetevents.version}</version>
+      <scope>provided</scope>
     </dependency>
 
     <!-- Annotation processing (compile-time only) -->
@@ -99,6 +110,18 @@
                   <shadedPattern>dev.lokspel.deathswap.thirdparty</shadedPattern>
                 </relocation>
               </relocations>
+              <filters>
+                <filter>
+                  <artifact>*:*</artifact>
+                  <excludes>
+                    <exclude>META-INF/*.SF</exclude>
+                    <exclude>META-INF/*.DSA</exclude>
+                    <exclude>META-INF/*.RSA</exclude>
+                    <exclude>META-INF/versions/*/module-info.class</exclude>
+                    <exclude>module-info.class</exclude>
+                  </excludes>
+                </filter>
+              </filters>
             </configuration>
           </execution>
         </executions>

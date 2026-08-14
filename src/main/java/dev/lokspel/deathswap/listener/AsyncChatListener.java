@@ -21,7 +21,7 @@ public class AsyncChatListener implements Listener {
 
     @EventHandler(priority = EventPriority.HIGH)
     public void handle(AsyncChatEvent event) {
-        if (!plugin.getMainConfig().game().isolateChat()) {
+        if (!plugin.getMainConfig().hide().isolateChat()) {
             return;
         }
 

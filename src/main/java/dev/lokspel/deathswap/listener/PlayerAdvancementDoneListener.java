@@ -8,43 +8,41 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.event.entity.PlayerDeathEvent;
+import org.bukkit.event.player.PlayerAdvancementDoneEvent;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class PlayerDeathListener implements Listener {
+public class PlayerAdvancementDoneListener implements Listener {
 
     private final DeathSwap plugin;
     private final GameManager game;
 
-    public PlayerDeathListener(DeathSwap plugin) {
+    public PlayerAdvancementDoneListener(DeathSwap plugin) {
         this.plugin = plugin;
         this.game = plugin.getGameManager();
     }
 
     @EventHandler(priority = EventPriority.HIGH)
-    public void handle(PlayerDeathEvent event) {
-        Player player = event.getPlayer();
-        game.onPlayerDeath(player);
-
-        if (!plugin.getMainConfig().hide().isolateDeaths()) {
+    public void handle(PlayerAdvancementDoneEvent event) {
+        if (!plugin.getMainConfig().hide().isolateAchievements()) {
             return;
         }
 
+        Player player = event.getPlayer();
         MatchManager match = game.findMatchByPlayer(player.getUniqueId());
         if (match == null) {
             return;
         }
 
-        Component deathMessage = event.deathMessage();
-        if (deathMessage == null) {
+        Component message = event.message();
+        if (message == null) {
             return;
         }
 
-        event.deathMessage(null);
+        event.message(null);
 
         List<Player> recipients = new ArrayList<>(match.getOnlinePlayers());
-        recipients.forEach(p -> p.sendMessage(deathMessage));
+        recipients.forEach(p -> p.sendMessage(message));
     }
 }
