@@ -7,10 +7,6 @@ import dev.lokspel.deathswap.config.section.HideSection;
 import dev.lokspel.deathswap.config.section.LobbySection;
 import dev.lokspel.deathswap.config.section.SoundsSection;
 import dev.lokspel.deathswap.config.section.WorldsSection;
-import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.configuration.file.YamlConfiguration;
-
-import java.io.File;
 
 public class MainConfig {
 
@@ -32,20 +28,12 @@ public class MainConfig {
         this.lobby = new LobbySection(plugin);
         this.hide = new HideSection(plugin);
         this.display = new DisplaySection(plugin);
-        this.messages = new MessagesConfig(loadMessages());
+        this.messages = new MessagesConfig(plugin);
     }
 
     public void load() {
         plugin.reloadConfig();
-        messages = new MessagesConfig(loadMessages());
-    }
-
-    private FileConfiguration loadMessages() {
-        File file = new File(plugin.getDataFolder(), "messages.yml");
-        if (!file.exists()) {
-            plugin.saveResource("messages.yml", false);
-        }
-        return YamlConfiguration.loadConfiguration(file);
+        messages = new MessagesConfig(plugin);
     }
 
     public GameSection game() {

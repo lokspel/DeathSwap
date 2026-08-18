@@ -1,8 +1,12 @@
 package dev.lokspel.deathswap.config;
 
+import dev.lokspel.deathswap.DeathSwap;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.configuration.file.YamlConfiguration;
+
+import java.io.File;
 
 public final class MessagesConfig {
 
@@ -11,8 +15,16 @@ public final class MessagesConfig {
     private final FileConfiguration config;
     private final MiniMessage miniMessage = MiniMessage.miniMessage();
 
-    public MessagesConfig(FileConfiguration config) {
-        this.config = config;
+    public MessagesConfig(DeathSwap plugin) {
+        this.config = load(plugin);
+    }
+
+    private FileConfiguration load(DeathSwap plugin) {
+        File file = new File(plugin.getDataFolder(), "messages.yml");
+        if (!file.exists()) {
+            plugin.saveResource("messages.yml", false);
+        }
+        return YamlConfiguration.loadConfiguration(file);
     }
 
     public Component get(String key) {
