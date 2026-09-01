@@ -1,5 +1,4 @@
-# DeathSwap Messages
-# Format: MiniMessage
+# Uses MiniMessage format: https://docs.advntr.dev/minimessage/
 
 # Prefix prepended to every message sent via prefixed()
 prefix: "<gold>[DeathSwap]</gold> "
