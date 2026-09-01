@@ -7,13 +7,13 @@ import com.github.retrooper.packetevents.PacketEvents;
 import io.github.retrooper.packetevents.factory.spigot.SpigotPacketEventsBuilder;
 import dev.lokspel.deathswap.util.placeholderapi.PlayerExpansion;
 import dev.lokspel.deathswap.command.CommandDispatcher;
+import dev.lokspel.deathswap.command.CommandDispatcher.RegisteredCommand;
 import dev.lokspel.deathswap.command.JoinCommand;
 import dev.lokspel.deathswap.command.LeaveCommand;
 import dev.lokspel.deathswap.command.ReloadCommand;
 import dev.lokspel.deathswap.command.SetLobbyCommand;
 import dev.lokspel.deathswap.command.StartCommand;
 import dev.lokspel.deathswap.command.StopCommand;
-import dev.lokspel.deathswap.command.RegisteredCommand;
 import dev.lokspel.deathswap.config.MainConfig;
 import dev.lokspel.deathswap.listener.AsyncChatListener;
 import dev.lokspel.deathswap.listener.PlayerAdvancementDoneListener;
@@ -67,7 +67,7 @@ public class DeathSwap extends JavaPlugin {
         worldPool = new WorldPool(this);
         gameManager = new GameManager(this);
 
-        CommandDispatcher dispatcher = new CommandDispatcher(this, List.of(
+        CommandDispatcher dispatcher = new CommandDispatcher(mainConfig, List.of(
                 new RegisteredCommand("start", new StartCommand(this)),
                 new RegisteredCommand("stop", new StopCommand(this)),
                 new RegisteredCommand("join", new JoinCommand(this)),
@@ -75,7 +75,9 @@ public class DeathSwap extends JavaPlugin {
                 new RegisteredCommand("reload", new ReloadCommand(this)),
                 new RegisteredCommand("setlobby", new SetLobbyCommand(this))
         ));
-        Objects.requireNonNull(getCommand("deathswap")).setExecutor(dispatcher);
+        var deathswapCmd = Objects.requireNonNull(getCommand("deathswap"));
+        deathswapCmd.setExecutor(dispatcher);
+        deathswapCmd.setTabCompleter(dispatcher);
 
         getServer().getPluginManager().registerEvents(new PlayerDeathListener(this), this);
         getServer().getPluginManager().registerEvents(new PlayerQuitListener(this), this);

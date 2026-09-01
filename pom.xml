@@ -11,7 +11,7 @@
     <java.version>25</java.version>
 
     <!-- Runtime dependencies -->
-    <paper.version>26.2.build.112-stable</paper.version>
+    <paper.version>[26.2.build,)</paper.version>
     <placeholderapi.version>2.12.3</placeholderapi.version>
     <bstats.version>3.2.1</bstats.version>
     <packetevents.version>2.13.0</packetevents.version>

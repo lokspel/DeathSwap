@@ -18,8 +18,10 @@ public class JoinCommand implements SubCommand {
 
     @Override
     public boolean execute(CommandSender sender, String[] args) {
-        Player player = SubCommand.requirePlayer(sender, messages);
-        if (player == null) return true;
+        if (!(sender instanceof Player player)) {
+            sender.sendMessage(messages.get("player-only"));
+            return true;
+        }
         game.join(player);
         return true;
     }

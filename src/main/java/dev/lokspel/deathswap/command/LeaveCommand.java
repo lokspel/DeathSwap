@@ -18,10 +18,12 @@ public class LeaveCommand implements SubCommand {
 
     @Override
     public boolean execute(CommandSender sender, String[] args) {
-        Player player = SubCommand.requirePlayer(sender, messages);
-        if (player == null) return true;
+        if (!(sender instanceof Player player)) {
+            sender.sendMessage(messages.get("player-only"));
+            return true;
+        }
         if (!game.isParticipant(player)) {
-            sender.sendMessage(DeathSwap.getInstance().getMainConfig().messages().prefixed("not-joined"));
+            sender.sendMessage(messages.prefixed("not-joined"));
             return true;
         }
         game.leave(player);

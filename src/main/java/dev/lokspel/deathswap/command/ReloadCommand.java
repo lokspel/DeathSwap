@@ -17,7 +17,10 @@ public class ReloadCommand implements SubCommand {
 
     @Override
     public boolean execute(CommandSender sender, String[] args) {
-        if (SubCommand.requirePermission(sender, config.messages(), "deathswap.reload")) return true;
+        if (!sender.hasPermission("deathswap.reload")) {
+            sender.sendMessage(config.messages().get("no-permission"));
+            return true;
+        }
         config.load();
         if (SoftDependUtil.PACKET_EVENTS_ENABLED && plugin.getPlayerHider() != null) {
             plugin.getPlayerHider().refreshVisibility();
