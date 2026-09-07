@@ -3,7 +3,6 @@ package dev.lokspel.deathswap.listener;
 import dev.lokspel.deathswap.DeathSwap;
 import dev.lokspel.deathswap.game.GameManager;
 import dev.lokspel.deathswap.game.MatchManager;
-import net.kyori.adventure.text.Component;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -25,7 +24,7 @@ public class PlayerDeathListener implements Listener {
 
     @EventHandler(priority = EventPriority.HIGH)
     public void handle(PlayerDeathEvent event) {
-        Player player = event.getPlayer();
+        Player player = event.getEntity();
         game.onPlayerDeath(player);
 
         if (!plugin.getMainConfig().hide().isolateDeaths()) {
@@ -37,12 +36,12 @@ public class PlayerDeathListener implements Listener {
             return;
         }
 
-        Component deathMessage = event.deathMessage();
+        String deathMessage = event.getDeathMessage();
         if (deathMessage == null) {
             return;
         }
 
-        event.deathMessage(null);
+        event.setDeathMessage(null);
 
         List<Player> recipients = new ArrayList<>(match.getOnlinePlayers());
         recipients.forEach(p -> p.sendMessage(deathMessage));

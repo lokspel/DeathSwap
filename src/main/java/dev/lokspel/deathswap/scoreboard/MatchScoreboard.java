@@ -2,14 +2,13 @@ package dev.lokspel.deathswap.scoreboard;
 
 import dev.lokspel.deathswap.DeathSwap;
 import dev.lokspel.deathswap.util.PlayerUtil;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.scoreboard.Criteria;
 import org.bukkit.scoreboard.DisplaySlot;
 import org.bukkit.scoreboard.Objective;
 import org.bukkit.scoreboard.Scoreboard;
+import org.bukkit.scoreboard.ScoreboardManager;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -30,8 +29,11 @@ public class MatchScoreboard {
         this.plugin = plugin;
     }
 
-    public void init(Component title) {
-        scoreboard = Bukkit.getScoreboardManager().getNewScoreboard();
+    public void init(String title) {
+        ScoreboardManager manager = Bukkit.getScoreboardManager();
+        if (manager == null) return;
+
+        scoreboard = manager.getNewScoreboard();
         deathsObjective = scoreboard.registerNewObjective("deaths", Criteria.DUMMY, title);
         deathsObjective.setDisplaySlot(DisplaySlot.SIDEBAR);
     }
@@ -54,8 +56,7 @@ public class MatchScoreboard {
             Player player = PlayerUtil.getOnlinePlayer(entry.getKey());
             if (player == null) continue;
 
-            String entryName = LegacyComponentSerializer.legacySection().serialize(
-                plugin.getMainConfig().messages().get("scoreboard-entry", "player", player.getName()));
+            String entryName = plugin.getMainConfig().messages().get("scoreboard-entry", "player", player.getName());
             if (entryName.length() > 40) {
                 entryName = entryName.substring(0, 40);
             }
@@ -72,8 +73,12 @@ public class MatchScoreboard {
     }
 
     public void remove(Set<UUID> playerUuids) {
-        for (Player player : PlayerUtil.getOnlinePlayers(playerUuids)) {
-            player.setScoreboard(Bukkit.getScoreboardManager().getMainScoreboard());
+        ScoreboardManager manager = Bukkit.getScoreboardManager();
+        if (manager != null) {
+            Scoreboard main = manager.getMainScoreboard();
+            for (Player player : PlayerUtil.getOnlinePlayers(playerUuids)) {
+                player.setScoreboard(main);
+            }
         }
         scoreboard = null;
         deathsObjective = null;

@@ -49,7 +49,9 @@ public class SwapManager {
                     if (showHud) {
                         PlayerUtil.showCountdownTitle(player, msg);
                     }
-                    player.playSound(tickSound);
+                    if (tickSound != null) {
+                        player.playSound(player.getLocation(), tickSound, 1.0f, 1.0f);
+                    }
                 }
             }
         }, 1L, 20L);
@@ -87,14 +89,18 @@ public class SwapManager {
         var loc2 = second.getLocation();
 
         for (Player player : playerList) {
-            player.playSound(goSound);
+            if (goSound != null) {
+                player.playSound(player.getLocation(), goSound, 1.0f, 1.0f);
+            }
         }
 
         first.teleport(loc2);
         second.teleport(loc1);
 
         for (Player player : playerList) {
-            player.playSound(swapSound);
+            if (swapSound != null) {
+                player.playSound(player.getLocation(), swapSound, 1.0f, 1.0f);
+            }
             player.sendMessage(messages.prefixed("swap-message"));
         }
     }

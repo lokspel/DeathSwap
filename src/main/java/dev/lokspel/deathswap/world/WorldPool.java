@@ -1,8 +1,9 @@
 package dev.lokspel.deathswap.world;
 
 import dev.lokspel.deathswap.DeathSwap;
+import dev.lokspel.deathswap.util.ReflectionUtil;
 import org.bukkit.Bukkit;
-import org.bukkit.GameRules;
+import org.bukkit.GameRule;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.WorldBorder;
@@ -19,6 +20,9 @@ import java.util.concurrent.ThreadLocalRandom;
  * match ends.
  */
 public class WorldPool {
+
+    private static final GameRule<Integer> RESPAWN_RADIUS_RULE =
+            ReflectionUtil.gameRuleOrNull("RESPAWN_RADIUS");
 
     private final DeathSwap plugin;
     private final WorldReset reset;
@@ -84,12 +88,12 @@ public class WorldPool {
                 return;
             }
 
-            Bukkit.getGlobalRegionScheduler().run(plugin, _ -> {
+            Bukkit.getScheduler().runTask(plugin, () -> {
                 evacuate(instance);
 
-                Bukkit.getGlobalRegionScheduler().runDelayed(
+                Bukkit.getScheduler().runTaskLater(
                         plugin,
-                        _ -> reset.reset(
+                        () -> reset.reset(
                                 instance,
                                 () -> loadInstance(instance)
                         ),
@@ -233,6 +237,10 @@ public class WorldPool {
 
     /**
      * Applies the configured respawn radius gamerule to every world.
+     *
+     * <p>Resolves {@code GameRules.RESPAWN_RADIUS} on Paper and
+     * {@code GameRule.RESPAWN_RADIUS} on Spigot at runtime; skips the
+     * gamerule entirely when neither variant is available.
      */
     private void applySpawnRule(WorldInstance instance) {
         int radius = Math.max(
@@ -240,13 +248,17 @@ public class WorldPool {
                 plugin.getMainConfig().worlds().spawnRadius()
         );
 
+        if (RESPAWN_RADIUS_RULE == null) {
+            return;
+        }
+
         for (World world : instance.allWorlds()) {
             if (world == null) {
                 continue;
             }
 
             world.setGameRule(
-                    GameRules.RESPAWN_RADIUS,
+                    RESPAWN_RADIUS_RULE,
                     radius
             );
         }
@@ -279,11 +291,11 @@ public class WorldPool {
 
         WorldInstance instance = instances.get(index);
 
-        Bukkit.getGlobalRegionScheduler().run(plugin, _ -> loadInstance(instance, () -> warmUpNext(index + 1)));
+        Bukkit.getScheduler().runTask(plugin, () -> loadInstance(instance, () -> warmUpNext(index + 1)));
     }
 
     /**
-     * Pre-generates the configured spawn area asynchronously.
+     * Pre-generates the configured spawn area.
      *
      * <p>The callback is invoked only after all requested chunks have finished
      * generating.
@@ -314,29 +326,23 @@ public class WorldPool {
         int maxX = centerX + radius;
         int maxZ = centerZ + radius;
 
-        world.getChunksAtAsync(
-                minX,
-                minZ,
-                maxX,
-                maxZ,
-                false,
-                () -> Bukkit.getGlobalRegionScheduler().run(
-                        plugin,
-                        _ -> {
-                            int x = world.getSpawnLocation().getBlockX();
-                            int z = world.getSpawnLocation().getBlockZ();
+        for (int x = minX; x <= maxX; x++) {
+            for (int z = minZ; z <= maxZ; z++) {
+                world.loadChunk(x, z, false);
+            }
+        }
 
-                            world.setSpawnLocation(
-                                    x,
-                                    world.getHighestBlockYAt(x, z) + 1,
-                                    z
-                            );
+        int x = world.getSpawnLocation().getBlockX();
+        int z = world.getSpawnLocation().getBlockZ();
 
-                            instance.markSpawnReady();
-
-                            onReady.run();
-                        }
-                )
+        world.setSpawnLocation(
+                x,
+                world.getHighestBlockYAt(x, z) + 1,
+                z
         );
+
+        instance.markSpawnReady();
+
+        onReady.run();
     }
 }

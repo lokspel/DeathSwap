@@ -1,20 +1,17 @@
 package dev.lokspel.deathswap.util;
 
-import net.kyori.adventure.sound.Sound;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
-import net.kyori.adventure.title.Title;
 import net.md_5.bungee.api.ChatMessageType;
 import net.md_5.bungee.api.chat.TextComponent;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
-import java.time.Duration;
 import java.util.Set;
 import java.util.UUID;
 
 public final class PlayerUtil {
 
-    private PlayerUtil() {}
+    private PlayerUtil() {
+    }
 
     public static Set<Player> getOnlinePlayers(Set<UUID> uuids) {
         var online = new java.util.HashSet<Player>();
@@ -26,17 +23,21 @@ public final class PlayerUtil {
     }
 
     public static Player getOnlinePlayer(UUID uuid) {
-        Player player = org.bukkit.Bukkit.getPlayer(uuid);
+        Player player = Bukkit.getPlayer(uuid);
         return (player != null && player.isOnline()) ? player : null;
     }
 
-    public static void showCountdownTitle(Player player, Component message) {
-        player.showTitle(Title.title(message, Component.empty(),
-            Title.Times.times(Duration.ZERO, Duration.ofSeconds(1), Duration.ZERO)));
+    public static void showCountdownTitle(Player player, String message) {
+        player.sendTitle(
+                message,
+                "",
+                0,
+                20,
+                0
+        );
     }
 
-    public static void showActionBar(Player player, Component message) {
-        String legacy = LegacyComponentSerializer.legacySection().serialize(message);
-        player.spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent.fromLegacyText(legacy));
+    public static void showActionBar(Player player, String message) {
+        player.spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent.fromLegacyText(message));
     }
 }

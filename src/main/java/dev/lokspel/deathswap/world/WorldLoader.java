@@ -1,6 +1,5 @@
 package dev.lokspel.deathswap.world;
 
-import io.papermc.paper.math.Position;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.WorldCreator;
@@ -16,18 +15,14 @@ import org.bukkit.WorldCreator;
  * built in a match link to that match's dimensions instead of the server's
  * shared ones.
  *
- * <p>A forced spawn position is set so world creation does not synchronously
- * scan/generate spawn chunks (which would stall the server thread for many
- * seconds per world). The exact position is corrected afterward in
+ * <p>The exact spawn position is corrected afterward in
  * {@code WorldPool#loadInstance}.
  */
 final class WorldLoader {
 
-    @SuppressWarnings("UnstableApiUsage")
     World load(String name, World.Environment environment) {
         WorldCreator creator = new WorldCreator(name)
-                .environment(environment)
-                .forcedSpawnPosition(Position.block(0, 64, 0), 0f, 0f);
+                .environment(environment);
         return Bukkit.createWorld(creator);
     }
 }

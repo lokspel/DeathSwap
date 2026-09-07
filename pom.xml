@@ -11,10 +11,11 @@
     <java.version>25</java.version>
 
     <!-- Runtime dependencies -->
-    <paper.version>[26.2.build,)</paper.version>
+    <spigot.version>26.2-R0.1-SNAPSHOT</spigot.version>
     <placeholderapi.version>2.12.3</placeholderapi.version>
     <bstats.version>3.2.1</bstats.version>
     <packetevents.version>2.13.0</packetevents.version>
+    <adventure.version>5.2.0</adventure.version>
 
     <!-- Build tooling -->
     <lombok.version>1.18.42</lombok.version>
@@ -25,8 +26,8 @@
   <!-- Repositories grouped by dependency -->
   <repositories>
     <repository>
-      <id>papermc</id>
-      <url>https://repo.papermc.io/repository/maven-public/</url>
+      <id>spigot-repo</id>
+      <url>https://hub.spigotmc.org/nexus/content/repositories/snapshots/</url>
     </repository>
     <repository>
       <id>placeholderapi</id>
@@ -41,9 +42,9 @@
   <dependencies>
     <!-- API (provided by server) -->
     <dependency>
-      <groupId>io.papermc.paper</groupId>
-      <artifactId>paper-api</artifactId>
-      <version>${paper.version}</version>
+      <groupId>org.spigotmc</groupId>
+      <artifactId>spigot-api</artifactId>
+      <version>${spigot.version}</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
@@ -54,6 +55,24 @@
     </dependency>
 
     <!-- Compile-time only (shaded into the final jar) -->
+    <dependency>
+      <groupId>net.kyori</groupId>
+      <artifactId>adventure-api</artifactId>
+      <version>${adventure.version}</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>net.kyori</groupId>
+      <artifactId>adventure-text-serializer-legacy</artifactId>
+      <version>${adventure.version}</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>net.kyori</groupId>
+      <artifactId>adventure-text-minimessage</artifactId>
+      <version>${adventure.version}</version>
+      <scope>compile</scope>
+    </dependency>
     <dependency>
       <groupId>org.bstats</groupId>
       <artifactId>bstats-bukkit</artifactId>
@@ -104,10 +123,15 @@
               <goal>shade</goal>
             </goals>
             <configuration>
+              <createDependencyReducedPom>false</createDependencyReducedPom>
               <relocations>
                 <relocation>
                   <pattern>org.bstats</pattern>
                   <shadedPattern>dev.lokspel.deathswap.thirdparty</shadedPattern>
+                </relocation>
+                <relocation>
+                  <pattern>net.kyori</pattern>
+                  <shadedPattern>dev.lokspel.deathswap.thirdparty.kyori</shadedPattern>
                 </relocation>
               </relocations>
               <filters>

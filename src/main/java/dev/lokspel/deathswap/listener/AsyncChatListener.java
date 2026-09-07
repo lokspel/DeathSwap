@@ -3,11 +3,11 @@ package dev.lokspel.deathswap.listener;
 import dev.lokspel.deathswap.DeathSwap;
 import dev.lokspel.deathswap.game.GameManager;
 import dev.lokspel.deathswap.game.MatchManager;
-import io.papermc.paper.event.player.AsyncChatEvent;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.player.AsyncPlayerChatEvent;
 
 public class AsyncChatListener implements Listener {
 
@@ -20,7 +20,7 @@ public class AsyncChatListener implements Listener {
     }
 
     @EventHandler(priority = EventPriority.HIGH)
-    public void handle(AsyncChatEvent event) {
+    public void handle(AsyncPlayerChatEvent event) {
         if (!plugin.getMainConfig().hide().isolateChat()) {
             return;
         }
@@ -29,11 +29,11 @@ public class AsyncChatListener implements Listener {
         MatchManager match = game.findMatchByPlayer(sender.getUniqueId());
 
         if (match != null) {
-            event.viewers().retainAll(match.getOnlinePlayers());
+            event.getRecipients().retainAll(match.getOnlinePlayers());
             return;
         }
 
-        event.viewers().removeIf(viewer ->
+        event.getRecipients().removeIf(viewer ->
                 viewer instanceof Player player &&
                         game.findMatchByPlayer(player.getUniqueId()) != null
         );

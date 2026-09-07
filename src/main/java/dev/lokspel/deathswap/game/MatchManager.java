@@ -10,14 +10,13 @@ import dev.lokspel.deathswap.game.player.PlayerState;
 import dev.lokspel.deathswap.game.player.PlayerStateManager;
 import dev.lokspel.deathswap.util.PlayerUtil;
 import dev.lokspel.deathswap.util.SoundUtil;
-import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
-import org.bukkit.GameRules;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitTask;
+import org.bukkit.scoreboard.ScoreboardManager;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -115,8 +114,7 @@ public class MatchManager {
      */
     private Location randomSpawn() {
         Location spawn = gameWorld.getSpawnLocation();
-        Integer radius = gameWorld.getGameRuleValue(GameRules.RESPAWN_RADIUS);
-        int r = radius == null ? 0 : radius;
+        int r = Math.max(0, cfg.worlds().spawnRadius());
         if (r <= 0) return spawn.clone();
 
         ThreadLocalRandom random = ThreadLocalRandom.current();
@@ -150,7 +148,11 @@ public class MatchManager {
         playerUuids.remove(player.getUniqueId());
         spectators.remove(player.getUniqueId());
         deaths.remove(player.getUniqueId());
-        player.setScoreboard(Bukkit.getScoreboardManager().getMainScoreboard());
+
+        ScoreboardManager manager = Bukkit.getScoreboardManager();
+        if (manager != null) {
+            player.setScoreboard(manager.getMainScoreboard());
+        }
 
         if (teleport) {
             plugin.getWorldPool().teleportToLobby(player);
@@ -180,7 +182,7 @@ public class MatchManager {
         return PlayerUtil.getOnlinePlayers(playerUuids);
     }
 
-    public void broadcast(Component message) {
+    public void broadcast(String message) {
         for (Player player : getOnlinePlayers()) {
             player.sendMessage(message);
         }
@@ -189,7 +191,9 @@ public class MatchManager {
     public void broadcastSound(String soundKey) {
         var sound = SoundUtil.minecraft(soundKey);
         for (Player player : getOnlinePlayers()) {
-            player.playSound(sound);
+            if (sound != null) {
+                player.playSound(player.getLocation(), sound, 1.0f, 1.0f);
+            }
         }
     }
 
