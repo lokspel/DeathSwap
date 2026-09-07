@@ -1,6 +1,6 @@
 # DeathSwap
 
-Last-player-standing minigame for Paper. Join a lobby, teleport to a fresh world, swap positions with a random alive opponent every interval, and stay alive until only you remain.
+Last-player-standing minigame. Join a lobby, teleport to a fresh world, swap positions with a random alive opponent every interval, and stay alive until only you remain.
 
 ## Features
 
@@ -22,7 +22,7 @@ Last-player-standing minigame for Paper. Join a lobby, teleport to a fresh world
 |---|---|---|
 | `/deathswap join` | `/ds join` | Join the lobby |
 | `/deathswap leave` | `/ds leave` | Leave the lobby or match |
-| `/deathswap start` | `/ds start` | Force-start the game (`deathswap.start`) |
+| `/deathswap start` | `/ds start` | Force-start the game (`deathswap.start`, requires lobby to be set) |
 | `/deathswap stop` | `/ds stop` | Stop the game (`deathswap.stop`) |
 | `/deathswap setlobby` | `/ds setlobby` | Set the lobby location (`deathswap.setlobby`) |
 | `/deathswap reload` | `/ds reload` | Reload config and messages (`deathswap.reload`) |
@@ -55,7 +55,7 @@ display:
 hide:
   isolate-chat: true          # Keep chat between players in the same match
   isolate-deaths: true        # Keep death messages between players in the same match
-  isolate-achievements: true  # Keep advancement messages between players in the same match
+  isolate-achievements: true  # Keep advancement messages between players in the same match (Paper only)
   match-players-in-tab: false # Hide players in a match from the tab list of players outside that match (requires PacketEvents)
 
 sounds:
@@ -78,6 +78,8 @@ worlds:
 ### `messages.yml`
 
 All messages in MiniMessage. Insert the prefix anywhere with `%prefix%`; placeholders like `<seconds>`, `<player>`, `<deaths>`, `<players>`, `<required>` are replaced at runtime.
+
+> **Note:** A lobby must be set with `/deathswap setlobby` before players can join or start a match.
 
 ## Placeholders
 
@@ -102,14 +104,16 @@ Requires Java 25 and Maven.
 mvn clean package
 ```
 
-The output jar is `target/DeathSwap-1.0.1.jar`.
+The output jar is `target/DeathSwap-1.0.4.jar`.
 
 ## Requirements
 
-- Paper 1.21.11+ (api-version 26.2)
+- Spigot or Paper 1.21.11+
 - Java 25
 - Optional: [PacketEvents](https://github.com/retrooper/packetevents) for the `hide.match-players-in-tab` feature. When not installed, the plugin still works; only tab-list hiding is unavailable.
 
 ## Tab hiding (PacketEvents)
 
 Scoped match visibility isolates players across concurrent matches: chat, death and advancement messages only reach players in the same match. When `hide.match-players-in-tab` is enabled (and PacketEvents is installed), in-match players are also removed from the tab list of players outside their match — a lobby player can't see match participants, and each match only shows its own members. The plugin reloads these settings on `/deathswap reload`, including for already-running matches.
+
+> **Note:** Isolation of advancement messages requires Paper; on Spigot this feature is unavailable.
