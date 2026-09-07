@@ -11,7 +11,6 @@ import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.concurrent.ThreadLocalRandom;
 
 /**
@@ -128,12 +127,7 @@ public class WorldPool {
     }
 
     public Location lobbyLocation() {
-        Location lobby = plugin.getMainConfig().lobby().get();
-
-        return Objects.requireNonNullElseGet(
-                lobby,
-                () -> Bukkit.getWorlds().getFirst().getSpawnLocation()
-        );
+        return plugin.getMainConfig().lobby().get();
     }
 
     /**

@@ -35,6 +35,10 @@ public class GameManager {
             player.sendMessage(plugin.getMainConfig().messages().prefixed("already-queue"));
             return;
         }
+        if (plugin.getMainConfig().lobby().isNotSet()) {
+            player.sendMessage(plugin.getMainConfig().messages().prefixed("lobby-not-set"));
+            return;
+        }
 
         lobby.join(player);
         lobby.tryAutoStart(this::createMatch);
@@ -68,6 +72,7 @@ public class GameManager {
 
     public boolean forceStart() {
         if (lobby.size() < 2) return false;
+        if (plugin.getMainConfig().lobby().isNotSet()) return false;
 
         lobby.cancelTask();
         createMatch();

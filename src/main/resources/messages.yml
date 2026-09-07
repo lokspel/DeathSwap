@@ -11,6 +11,7 @@ lobby-set: "%prefix%<green>Lobby location has been set.</green>"
 usage: "%prefix%<red>Usage: /deathswap <join|leave|start|stop|reload|setlobby></red>"
 player-only: "<red>Only players can use this command.</red>"
 no-permission: "<red>You don't have permission to use this command.</red>"
+lobby-not-set: "%prefix%<red>Lobby is not set. Use /deathswap setlobby first.</red>"
 
 # Join / Leave
 joined: "%prefix%<green>You joined the DeathSwap game.</green>"

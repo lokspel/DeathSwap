@@ -22,13 +22,19 @@ public class LobbySection {
 
     public void set(Location location) {
         var cfg = config();
-        cfg.set(PATH + "world", location.getWorld().getName());
+        var world = location.getWorld();
+        if (world == null) return;
+        cfg.set(PATH + "world", world.getName());
         cfg.set(PATH + "x", location.getX());
         cfg.set(PATH + "y", location.getY());
         cfg.set(PATH + "z", location.getZ());
         cfg.set(PATH + "yaw", (double) location.getYaw());
         cfg.set(PATH + "pitch", (double) location.getPitch());
         plugin.saveConfig();
+    }
+
+    public boolean isNotSet() {
+        return !config().contains(PATH + "world");
     }
 
     public Location get() {
