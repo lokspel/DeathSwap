@@ -69,9 +69,7 @@ Match visibility also scopes chat, death, and advancement messages between concu
 
 > **Note:** Advancement message isolation requires Paper and is unavailable on Spigot.
 
-## » Building
+## » Build
 
-Requires Java 25 and Maven.
-
-```sh
+```bash
 mvn clean package
