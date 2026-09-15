@@ -1,65 +1,76 @@
 # DeathSwap
 
-Last-player-standing minigame. Join a lobby, teleport to a fresh world, swap positions with a random alive opponent every interval, and stay alive until only you remain.
+Last-player-standing minigame with timed position swaps between alive players.
 
-## Features
+## » About
 
-- Auto-start lobby with configurable player minimums
-- Timed position swaps with warning countdown
-- Death tracking with configurable lives; last one standing wins
-- Optional match time limit with winner-by-fewest-deaths (and tie messaging)
+Players join a lobby and are sent into a fresh temporary world when the match starts. At regular intervals, their positions are swapped with random alive opponents. Players must survive until they are the last one standing.
+
+## » Features
+
+- Auto-start lobby with configurable player requirements
+- Timed position swaps with warning countdowns
+- Configurable lives and death tracking
+- Last-player-standing win condition
+- Optional match time limit with winner-by-fewest-deaths
+- Tie messaging when players have the same death count
 - Toggleable sidebar scoreboard and HUD countdowns
-- Scoped match visibility (chat, death, advancement messages) across concurrent matches
-- Optional tab-list hiding of in-match players (requires PacketEvents)
-- PvP toggle, configurable sounds
-- Fresh temporary world per match, deleted on game end
-- Optional per-match nether and end dimensions (own portals per game)
-- Configurable per-world random respawn radius around spawn
+- Match-scoped chat, death, and advancement messages
+- Optional in-match tab-list hiding with PacketEvents
+- Configurable PvP and sounds
+- Fresh temporary world for every match
+- Automatic world deletion after the match
+- Optional per-match nether and end dimensions
+- Per-world random respawn radius around spawn
 
-## Commands
+## » Commands
 
-| Command | Aliases | Description |
-|---|---|---|
-| `/deathswap join` | `/ds join` | Join the lobby |
-| `/deathswap leave` | `/ds leave` | Leave the lobby or match |
-| `/deathswap start` | `/ds start` | Force-start the game (`deathswap.start`, requires lobby to be set) |
-| `/deathswap stop` | `/ds stop` | Stop the game (`deathswap.stop`) |
-| `/deathswap setlobby` | `/ds setlobby` | Set the lobby location (`deathswap.setlobby`) |
-| `/deathswap reload` | `/ds reload` | Reload config and messages (`deathswap.reload`) |
+| Command | Aliases | Description | Permission |
+| --- | --- | --- | --- |
+| `/deathswap join` | `/ds join` | Join the lobby | — |
+| `/deathswap leave` | `/ds leave` | Leave the lobby or match | — |
+| `/deathswap start` | `/ds start` | Force-start the game | `deathswap.start` |
+| `/deathswap stop` | `/ds stop` | Stop the game | `deathswap.stop` |
+| `/deathswap setlobby` | `/ds setlobby` | Set the lobby location | `deathswap.setlobby` |
+| `/deathswap reload` | `/ds reload` | Reload config and messages | `deathswap.reload` |
 
-## Placeholders
+## » Placeholders
 
-Requires [PlaceholderAPI](https://placeholderapi.com). The expansion registers under both `deathswap` and `ds`, so a placeholder can be written as `%deathswap_<name>%` or `%ds_<name>%`.
+Requires [PlaceholderAPI](https://placeholderapi.com).
+
+The expansion is available under both `deathswap` and `ds`.
 
 | Placeholder | Description |
-|---|---|
-| `%deathswap_state%` | Player's game state: `none`, `lobby`, `match` or `spectator` |
-| `%deathswap_deaths%` | Current death count in the match (`0` if not in a match) |
+| --- | --- |
+| `%deathswap_state%` | Player's current state: `none`, `lobby`, `match`, or `spectator` |
+| `%deathswap_deaths%` | Current death count (`0` outside a match) |
 | `%deathswap_deaths_left%` | Deaths remaining before elimination |
-| `%deathswap_max_deaths%` | `max-deaths` configured limit |
+| `%deathswap_max_deaths%` | Configured maximum deaths |
 | `%deathswap_players_in_lobby%` | Players currently waiting in the lobby |
-| `%deathswap_min_players%` | `min-players-to-start` required to start |
-| `%deathswap_swap_interval%` | `swap-interval` configured seconds between swaps |
-| `%deathswap_next_swap%` | Live countdown (seconds) until the next swap (`0` = swapping now; full interval outside a match) |
+| `%deathswap_min_players%` | Minimum players required to start |
+| `%deathswap_swap_interval%` | Configured swap interval in seconds |
+| `%deathswap_next_swap%` | Seconds until the next swap |
 
-## Building
+## » Requirements
+
+- Spigot or Paper `1.21.11+`
+- Java 25
+- Optional: [PacketEvents](https://github.com/retrooper/packetevents) for match player tab-list hiding
+- Optional: [PlaceholderAPI](https://placeholderapi.com) for placeholders
+
+## » Tab List Hiding
+
+When `hide.match-players-in-tab` is enabled and PacketEvents is installed, players outside a match cannot see its participants in the tab list.
+
+Each match only displays its own participants, while lobby players remain separate from active matches.
+
+Match visibility also scopes chat, death, and advancement messages between concurrent matches.
+
+> **Note:** Advancement message isolation requires Paper and is unavailable on Spigot.
+
+## » Building
 
 Requires Java 25 and Maven.
 
 ```sh
 mvn clean package
-```
-
-The output jar is `target/DeathSwap-1.0.4.jar`.
-
-## Requirements
-
-- Spigot or Paper 1.21.11+
-- Java 25
-- Optional: [PacketEvents](https://github.com/retrooper/packetevents) for the `hide.match-players-in-tab` feature. When not installed, the plugin still works; only tab-list hiding is unavailable.
-
-## Tab hiding (PacketEvents)
-
-Scoped match visibility isolates players across concurrent matches: chat, death and advancement messages only reach players in the same match. When `hide.match-players-in-tab` is enabled (and PacketEvents is installed), in-match players are also removed from the tab list of players outside their match — a lobby player can't see match participants, and each match only shows its own members. The plugin reloads these settings on `/deathswap reload`, including for already-running matches.
-
-> **Note:** Isolation of advancement messages requires Paper; on Spigot this feature is unavailable.
